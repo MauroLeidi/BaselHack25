@@ -226,6 +226,19 @@ async def process_form(
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+    
+@app.post("/predict")
+async def predict(form_data: FormData):
+    # Esempio di elaborazione:
+    message = f"Dati ricevuti con successo. Stato fumo: {'Sì' if form_data.smokes else 'No'}."
+    
+   # TODO MAURO
+    return JSONResponse(content={
+        "status": "success",
+        "message": message,
+        "received_data": form_data.model_dump()
+    })
+
 
 @app.get("/health")
 async def health_check():
