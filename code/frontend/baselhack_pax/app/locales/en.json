@@ -1,0 +1,56 @@
+{
+  "form": {
+    "title": "Health Questionnaire",
+    "subtitle": "Please answer truthfully. Fields marked required must be completed.",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "smoke": "Do you smoke?",
+    "yes": "Yes",
+    "no": "No",
+    "age": "Age",
+    "weight": "Weight",
+    "height": "Height",
+    "bmi": "BMI (auto-calculated)",
+    "cigarettes_per_day": "Cigarettes per day",
+    "date_of_birth": "Date of birth",
+    "sport_section": "Sports",
+    "sport_name": "Sport",
+    "sport_placeholder": "e.g., Basketball, Running, Climbing…",
+    "sport_level": "Level",
+    "sport_hobby": "Hobby / Recreational",
+    "sport_competitive": "Competitive",
+    "add_sport": "Add sport",
+    "remove": "Remove",
+    "submit": "Submit",
+    "errors": {
+      "required": "Please complete all required fields."
+    },
+    "submitted": "Form submitted. Check console for payload."
+  },
+  "upload": {
+    "title": "Upload Photo / PDF of the Form",
+    "subtitle": "Supported: PDF, JPG, PNG. We’ll extract the fields and continue the underwriting flow.",
+    "choose": "Choose file",
+    "placeholder": "Select a PDF or image",
+    "notes": "Notes (optional)",
+    "notes_ph": "Anything we should know?",
+    "uploadBtn": "Upload",
+    "done": "File uploaded. We’ll extract the fields and run underwriting next.",
+    "footnote": "Make sure the photo is clear, with all corners visible.",
+    "errors": {
+      "noFile": "Please select a file first.",
+      "failed": "Upload failed (status: {status}).",
+      "generic": "Upload failed. Please try again."
+    },
+    "tabUpload": "Upload",
+    "tabCamera": "Camera",
+    "camera": {
+      "opening": "Opening camera…",
+      "error": "Could not access the camera. Check permissions or use file upload.",
+      "take": "Take photo",
+      "flip": "Flip camera",
+      "close": "Close",
+      "retake": "Retake"
+    }
+  }
+}

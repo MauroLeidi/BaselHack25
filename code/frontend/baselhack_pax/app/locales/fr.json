@@ -1,0 +1,56 @@
+{
+  "form": {
+    "title": "Questionnaire de santé",
+    "subtitle": "Veuillez répondre sincèrement. Les champs obligatoires doivent être remplis.",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "smoke": "Fumez-vous ?",
+    "yes": "Oui",
+    "no": "Non",
+    "age": "Âge",
+    "weight": "Poids",
+    "height": "Taille",
+    "date_of_birth": "Date de naissance",
+    "cigarettes_per_day": "Cigarettes par jour",
+    "bmi": "IMC (calcul automatique)",
+    "sport_section": "Sports",
+    "sport_name": "Sport",
+    "sport_placeholder": "p. ex., Basket-ball, Course à pied, Escalade…",
+    "sport_level": "Niveau",
+    "sport_hobby": "Loisir / Récréatif",
+    "sport_competitive": "Compétition",
+    "add_sport": "Ajouter un sport",
+    "remove": "Supprimer",
+    "submit": "Envoyer",
+    "errors": {
+      "required": "Veuillez compléter tous les champs obligatoires."
+    },
+    "submitted": "Formulaire envoyé. Consultez la console pour le payload."
+  },
+  "upload": {
+    "title": "Téléverser la photo / le PDF du formulaire",
+    "subtitle": "Pris en charge : PDF, JPG, PNG. Nous extrairons les champs et poursuivrons la souscription.",
+    "choose": "Choisir un fichier",
+    "placeholder": "Sélectionner un PDF ou une image",
+    "notes": "Remarques (facultatif)",
+    "notes_ph": "Quelque chose à signaler ?",
+    "uploadBtn": "Téléverser",
+    "done": "Fichier téléversé. Nous allons extraire les champs et lancer la souscription.",
+    "footnote": "Assurez-vous que la photo est nette, avec les coins visibles.",
+    "errors": {
+      "noFile": "Veuillez d’abord sélectionner un fichier.",
+      "failed": "Échec du téléversement (statut : {status}).",
+      "generic": "Échec du téléversement. Veuillez réessayer."
+    },
+    "tabUpload": "Téléverser",
+    "tabCamera": "Caméra",
+    "camera": {
+      "opening": "Ouverture de la caméra…",
+      "error": "Impossible d’accéder à la caméra. Vérifiez les permissions ou utilisez le téléversement.",
+      "take": "Prendre une photo",
+      "flip": "Inverser la caméra",
+      "close": "Fermer",
+      "retake": "Reprendre"
+    }
+  }
+}
