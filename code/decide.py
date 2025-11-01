@@ -96,24 +96,10 @@ def decide_and_learn(rules_df, x_input, learn_flag=True):
 # --------------------------------------------------
 # 5. Helper for API use (no learning)
 # --------------------------------------------------
-def predict_decision(form_data):
+def predict_decision(x_input):
     """
     Predict decision from form data without modifying the rules table.
     """
-    # Derive BMI and AGE roughly
-    height_m = form_data['height_cm'] / 100
-    BMI = round(form_data['weight_kg'] / (height_m ** 2), 1)
-    birth_year = int(form_data['date_of_birth'].split(".")[-1])
-    current_year = 2025
-    AGE = current_year - birth_year
-
-    x_input = {
-        'BMI': BMI,
-        'AGE': AGE,
-        'SMOKER': form_data['smokes'],
-        'PRACTICE_SPORT': len(form_data['sports']) > 0
-    }
-
     decision, _, comment, _ = decide_and_learn(rules_df, x_input, learn_flag=False)
     return decision, comment
 

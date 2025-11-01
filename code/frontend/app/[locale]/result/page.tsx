@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
+  Button,
   Container,
+  Group,
   Paper,
   Stack,
-  Title,
   Text,
-  Button,
-  Group,
+  Title,
 } from "@mantine/core";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type PredictResp = {
   status?: string;
@@ -28,6 +28,7 @@ export default function ResultPage() {
     const raw = sessionStorage.getItem("pax_predict_result");
     if (raw) {
       try {
+        console.log(JSON.parse(raw))
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setResult(JSON.parse(raw));
       } catch {

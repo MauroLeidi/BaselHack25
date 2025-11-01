@@ -162,31 +162,77 @@ Your explanation:"""
         except Exception as e:
             return f"Error generating explanation: {str(e)}"
 
-if __name__ == "__main__":
+
+def explain_insurance_decision(insurance_data, 
+                               model_path="../assets/predictor_decision.joblib",
+                               encoder_path="../assets/label_encoder.joblib",
+                               use_gpt=True,
+                               gpt_model="gpt-4",
+                               verbose=True):
+    """
+    Convenience function to get insurance decision with explanation.
+    
+    Args:
+        insurance_data: dict with keys 'BMI', 'AGE', 'SMOKER', 'PRACTICE_SPORT'
+                       Example: {'BMI': 28, 'AGE': 51, 'SMOKER': 1, 'PRACTICE_SPORT': 1}
+        model_path: Path to the saved Random Forest model
+        encoder_path: Path to the saved LabelEncoder
+        use_gpt: Whether to generate GPT explanation (default: True)
+        gpt_model: Which GPT model to use (default: "gpt-4")
+        verbose: Whether to print formatted results (default: True)
+        
+    Returns:
+        dict with prediction results and explanation
+    """
     # Initialize explainer
     explainer = InsuranceDecisionExplainer(
-        model_path="../assets/predictor_decision.joblib",
-        encoder_path="../assets/label_encoder.joblib"
+        model_path=model_path,
+        encoder_path=encoder_path
     )
     
-    # Example 1: Single prediction
-    print("="*80)
-    print("Example 1: High-risk case (BMI=28, AGE=51, SMOKER=True)")
-    print("="*80)
-    
+    # Get prediction with explanation
     result = explainer.predict_with_explanation(
-        BMI=28,
-        AGE=51,
-        SMOKER=1,
-        PRACTICE_SPORT=1,
-        use_gpt=True
+        BMI=insurance_data['BMI'],
+        AGE=insurance_data['AGE'],
+        SMOKER=insurance_data['SMOKER'],
+        PRACTICE_SPORT=insurance_data['PRACTICE_SPORT'],
+        use_gpt=use_gpt,
+        gpt_model=gpt_model
     )
     
-    print(f"\nDecision: {result['decision']}")
-    print(f"Confidence: {result['probability']:.1%}")
-    print(f"\nTop Contributing Features:")
-    for feat, shap_val in result['top_features']:
-        print(f"  {feat:20s}: {shap_val:+.4f}")
+    # Print formatted output if verbose
+    if verbose:
+        print("="*80)
+        print(f"Insurance Decision Analysis")
+        print("="*80)
+        print(f"\nApplicant Profile:")
+        print(f"  BMI: {insurance_data['BMI']}")
+        print(f"  AGE: {insurance_data['AGE']}")
+        print(f"  SMOKER: {'Yes' if insurance_data['SMOKER'] else 'No'}")
+        print(f"  PRACTICE_SPORT: {'Yes' if insurance_data['PRACTICE_SPORT'] else 'No'}")
+        
+        print(f"\nDecision: {result['decision']}")
+        print(f"Confidence: {result['probability']:.1%}")
+        
+        print(f"\nTop Contributing Features:")
+        for feat, shap_val in result['top_features']:
+            print(f"  {feat:20s}: {shap_val:+.4f}")
+        
+        if 'explanation' in result:
+            print(f"\nGPT Explanation:\n  {result['explanation']}")
+        
+        print("="*80)
     
-    if 'explanation' in result:
-        print(f"\nGPT Explanation:\n  {result['explanation']}")
+    return result
+
+
+if __name__ == "__main__":
+    # Example usage of the convenience function
+    insurance_data = {
+        'BMI': 28,
+        'AGE': 51,
+        'SMOKER': 1,
+        'PRACTICE_SPORT': 1
+    }
+    
+    result = explain_insurance_decision(insurance_data)

@@ -2,36 +2,44 @@
 import joblib
 import numpy as np
 from pydantic import BaseModel, Field
-from typing import Optional
-
-# =========================
-# Schema di input
-# =========================
-class InsuranceInput(BaseModel):
-    eta: int = Field(..., ge=18, le=100, description="Età del cliente")
-    bmi: float = Field(..., ge=10, le=60, description="Indice di massa corporea")
-    fumo: int = Field(..., ge=0, le=1, description="Fumatore: 0=No, 1=Sì")
-    sport: int = Field(..., ge=0, le=1, description="Pratica sport: 0=No, 1=Sì")
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "eta": 35,
-                "bmi": 27.5,
-                "fumo": 0,
-                "sport": 1
-            }
-        }
+from typing import List, Optional
 
 class PredictionOutput(BaseModel):
-    prezzo_predetto: float
-    prezzo_base: float
-    aggiustamento_percentuale: float
-    aggiustamento_euro: float
+    predicted_price: float
+    base_price: float
+    adjustment_percentage: float
+    adjustment_euro: float
+
+# Define your Pydantic schema for the form fields
+class FormData(BaseModel):
+    """Schema for extracting health-related form fields from the image"""
+    first_name: Optional[str] = Field(None, description="First name of the person")
+    last_name: Optional[str] = Field(None, description="Last name of the person")
+    smokes: bool = Field(description="Whether the person smokes (Yes/No, True/False)")
+    cigarettes_per_day: Optional[int] = Field(None, description="Number of cigarettes smoked per day. None if doesn't smoke or not specified")
+    height_cm: Optional[float] = Field(None, description="Height in centimeters")
+    weight_kg: Optional[float] = Field(None, description="Weight in kilograms")
+    date_of_birth: Optional[str] = Field(None, description="The birth year of the person in format DD.MM.YYYY")
+    sports: Optional[List[str]] = Field(None, description="List of sports the person practices")
+
+def get_insurance_data(form_data: FormData):
+    height_m = form_data.height_cm / 100
+    BMI = round(form_data.weight_kg / (height_m ** 2), 1)
+    birth_year = int(form_data.date_of_birth.split(".")[-1])
+    current_year = 2025
+    AGE = current_year - birth_year
+    return {
+        'BMI': BMI,
+        'AGE': AGE,
+        'SMOKER': form_data.smokes,
+        'PRACTICE_SPORT': len(form_data.sports) > 0
+    }
+
+
 
 
 # =========================
-# Classe per gestire il modello
+# Class to manage the model
 # =========================
 class InsuranceModel:
     def __init__(self, model_path: str = "insurance_model.joblib", 
@@ -42,61 +50,60 @@ class InsuranceModel:
         self.base_price: Optional[float] = None
         
     def load_model(self) -> bool:
-        """Carica il modello e il prezzo base"""
+        """Loads the model and base price"""
         try:
             self.rf_model = joblib.load(f"../assets/{self.model_path}")
             self.base_price = joblib.load(f"../assets/{self.base_price_path}")
-            print("✅ Modello caricato con successo")
+            print("✅ Model loaded successfully")
             return True
         except Exception as e:
-            print(f"❌ Errore nel caricamento del modello: {e}")
+            print(f"❌ Error loading model: {e}")
             self.rf_model = None
             self.base_price = None
             return False
     
     def is_loaded(self) -> bool:
-        """Verifica se il modello è caricato"""
+        """Checks if the model is loaded"""
         return self.rf_model is not None and self.base_price is not None
     
-    def calculate_price_adjustment(self, data: InsuranceInput) -> PredictionOutput:
+    def calculate_price_adjustment(self, data) -> PredictionOutput:
         """
-        Calcola il prezzo predetto e l'aggiustamento percentuale.
+        Calculates the predicted price and percentage adjustment.
         
         Args:
-            data: Dati del cliente (eta, bmi, fumo, sport)
+            data: Customer data (age, bmi, smoker, sport)
         
         Returns:
-            PredictionOutput con prezzo predetto e aggiustamenti
+            PredictionOutput with predicted price and adjustments
             
         Raises:
-            ValueError: Se il modello non è caricato
+            ValueError: If the model is not loaded
         """
         if not self.is_loaded():
-            raise ValueError("Modello non caricato. Eseguire load_model() prima.")
+            raise ValueError("Model not loaded. Run load_model() first.")
         
-        # Prepara i dati per la predizione
-        input_data = np.array([[data.eta, data.bmi, data.fumo, data.sport]])
+        # Prepare data for prediction
+        input_data = np.array([[data["BMI"], data["AGE"], data["SMOKER"], data["PRACTICE_SPORT"]]])
         
-        # Predizione
-        prezzo_predetto = self.rf_model.predict(input_data)[0]
+        # Prediction
+        predicted_price = self.rf_model.predict(input_data)[0]
         
-        # Calcolo aggiustamento
-        differenza = prezzo_predetto - self.base_price
+        # Calculate adjustment
+        difference = predicted_price - self.base_price
 
-        if differenza >= 0:
-            aggiustamento_percentuale = (differenza / self.base_price) * 100
+        if difference >= 0:
+            adjustment_percentage = (difference / self.base_price) * 100
         else:
-            aggiustamento_percentuale = 0
+            adjustment_percentage = 0
         
         return PredictionOutput(
-            prezzo_predetto=round(prezzo_predetto, 2),
-            prezzo_base=round(float(self.base_price), 2),
-            aggiustamento_percentuale=round(aggiustamento_percentuale, 2),
-            aggiustamento_euro=round(differenza, 2)
+            predicted_price=round(predicted_price, 2),
+            base_price=round(float(self.base_price), 2),
+            adjustment_percentage=round(adjustment_percentage, 2),
+            adjustment_euro=round(difference, 2)
         )
 
-
 # =========================
-# Istanza globale (singleton)
+# Global instance (singleton)
 # =========================
 insurance_model = InsuranceModel()

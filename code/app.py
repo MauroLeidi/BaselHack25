@@ -9,8 +9,10 @@ from dotenv import load_dotenv
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware # 1. Import Middleware
 from decide import predict_decision,replace_rule_table
-from utils import insurance_model, InsuranceInput, PredictionOutput
+from utils import insurance_model
 from contextlib import asynccontextmanager
+from utils import FormData, get_insurance_data
+from reasoning_agent import explain_insurance_decision
 
 load_dotenv()
 
@@ -36,18 +38,6 @@ app.add_middleware(
 
 # Initialize OpenAI client
 client = OpenAI()
-
-# Define your Pydantic schema for the form fields
-class FormData(BaseModel):
-    """Schema for extracting health-related form fields from the image"""
-    first_name: Optional[str] = Field(None, description="First name of the person")
-    last_name: Optional[str] = Field(None, description="Last name of the person")
-    smokes: bool = Field(description="Whether the person smokes (Yes/No, True/False)")
-    cigarettes_per_day: Optional[int] = Field(None, description="Number of cigarettes smoked per day. None if doesn't smoke or not specified")
-    height_cm: Optional[float] = Field(None, description="Height in centimeters")
-    weight_kg: Optional[float] = Field(None, description="Weight in kilograms")
-    date_of_birth: Optional[str] = Field(None, description="The birth year of the person in format DD.MM.YYYY")
-    sports: Optional[List[str]] = Field(None, description="List of sports the person practices")
 
 # -------------------------------------------------------------------------------
 # Pydantic model for rules, useful when rules updates are made from the frontend
@@ -155,31 +145,28 @@ async def process_form(
     
 @app.post("/predict")
 async def predict(form_data: FormData):
-    decision, comment = predict_decision(form_data.dict())
+    # get insurance values
+    insurance_data = get_insurance_data(form_data)
+
+    # get prediction
+    print("Getting prediction..")
+    decision, comment = predict_decision(insurance_data)
+
+    # get reasoning via shapey values
+    print("Getting explanation for decision..")
+    reasoning_advanced = explain_insurance_decision(insurance_data)
+
+    # predict adjustment price change
+    print("Getting price adjustment..")
+    prediction_output = insurance_model.calculate_price_adjustment(insurance_data)
+    
     return JSONResponse(content={
         "status": "success",
         "decision": decision,
-        "reason": comment
+        "reason": comment,
+        "prediction_output": prediction_output.model_dump(),
+        "reasoning_advanced": reasoning_advanced
     })
-
-@app.post("/predict-adjustment", response_model=PredictionOutput)
-async def predict_adjustment(data: InsuranceInput):
-    """
-    Predice l'aggiustamento del prezzo assicurativo basato sui dati del cliente.
-    """
-    if not insurance_model.is_loaded():
-        raise HTTPException(
-            status_code=500, 
-            detail="Modello non caricato correttamente"
-        )
-    
-    try:
-        return insurance_model.calculate_price_adjustment(data)
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Errore durante la predizione: {str(e)}"
-        )
 
 
 @app.get("/health")

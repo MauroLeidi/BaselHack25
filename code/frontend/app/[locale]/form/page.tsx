@@ -1,39 +1,39 @@
 "use client";
 
+import DobField from "@/app/components/form/DobField";
+import MetricsFields from "@/app/components/form/MetricsFields";
+import NameFields from "@/app/components/form/NameFields";
+import SmokingFields from "@/app/components/form/SmokingFields";
+import SportsSection from "@/app/components/form/SportsSection";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
+import { formatDDMMYYYY } from "@/helpers/form/date";
+import { prefillAll, PrefillPayload } from "@/helpers/form/prefill";
+import { Errors, Smoke, SportEntry } from "@/helpers/form/types";
+import { makeValidators } from "@/helpers/form/validators";
 import {
   ActionIcon, Button, Container, Divider, Group, Paper, Stack, Text, Title, Tooltip,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { IconChevronLeft } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { notifications } from "@mantine/notifications";
-import { formatDDMMYYYY, parseLooseDob } from "@/helpers/form/date";
-import { makeValidators } from "@/helpers/form/validators";
-import { Errors, Smoke, SportEntry } from "@/helpers/form/types";
-import { prefillAll, PrefillPayload } from "@/helpers/form/prefill";
-import NameFields from "@/app/components/form/NameFields";
-import SmokingFields from "@/app/components/form/SmokingFields";
-import MetricsFields from "@/app/components/form/MetricsFields";
-import SportsSection from "@/app/components/form/SportsSection";
-import DobField from "@/app/components/form/DobField";
 
 export default function OnlineFormPage() {
   const { locale } = useParams() as { locale: string };
   const t = useTranslations("form");
 
   const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName]   = useState("");
-  const [smoke, setSmoke]         = useState<Smoke>(null);
-  const [height, setHeight]       = useState<number | "">("");
-  const [weight, setWeight]       = useState<number | "">("");
+  const [lastName, setLastName] = useState("");
+  const [smoke, setSmoke] = useState<Smoke>(null);
+  const [height, setHeight] = useState<number | "">("");
+  const [weight, setWeight] = useState<number | "">("");
   const [cigarettesPerDay, setCigarettesPerDay] = useState<number | "">("");
-  const [dob, setDob]             = useState<Date | null>(null);
-  const [sports, setSports]       = useState<SportEntry[]>([{ name: "", level: "hobby" }]);
-  const [errors, setErrors]       = useState<Errors>({});
-  const shownNotiIdsRef           = useRef<Set<string>>(new Set());
+  const [dob, setDob] = useState<Date | null>(null);
+  const [sports, setSports] = useState<SportEntry[]>([{ name: "", level: "hobby" }]);
+  const [errors, setErrors] = useState<Errors>({});
+  const shownNotiIdsRef = useRef<Set<string>>(new Set());
 
   const isSmoker = smoke === "yes";
 
@@ -62,9 +62,9 @@ export default function OnlineFormPage() {
   }
 
   const onBlurFirstName = () => setFieldError("firstName", validators.firstName(firstName));
-  const onBlurLastName  = () => setFieldError("lastName", validators.lastName(lastName));
-  const onBlurCPD       = () => setFieldError("cigarettesPerDay", validators.cigarettesPerDay(cigarettesPerDay, isSmoker));
-  const onBlurHeight = () => setFieldError("height", validators.height(height)); 
+  const onBlurLastName = () => setFieldError("lastName", validators.lastName(lastName));
+  const onBlurCPD = () => setFieldError("cigarettesPerDay", validators.cigarettesPerDay(cigarettesPerDay, isSmoker));
+  const onBlurHeight = () => setFieldError("height", validators.height(height));
   const onBlurWeight = () => setFieldError("weight", validators.weight(weight));
 
   useEffect(() => {
@@ -76,34 +76,34 @@ export default function OnlineFormPage() {
 
 
 
-useEffect(() => {
-  const raw = sessionStorage.getItem("pax_form_prefill");
-  if (!raw) return;
+  useEffect(() => {
+    const raw = sessionStorage.getItem("pax_form_prefill");
+    if (!raw) return;
 
-  let applied = 0;
-  try {
-    const data = JSON.parse(raw) as PrefillPayload;
-    applied = prefillAll({
-      data,
-      setFirstName, setLastName,
-      setSmoke, setCigarettesPerDay,
-      setHeight, setWeight,
-      setDob, setSports,
-    });
-  } catch {}
-  finally {
-    sessionStorage.removeItem("pax_form_prefill");
-  }
+    let applied = 0;
+    try {
+      const data = JSON.parse(raw) as PrefillPayload;
+      applied = prefillAll({
+        data,
+        setFirstName, setLastName,
+        setSmoke, setCigarettesPerDay,
+        setHeight, setWeight,
+        setDob, setSports,
+      });
+    } catch { }
+    finally {
+      sessionStorage.removeItem("pax_form_prefill");
+    }
 
-  if (applied > 0) {
-    notifications.show({
-      title: "Prefilled",
-      message: "We prefilled your form from the uploaded document.",
-      color: "blue",
-      autoClose: 4000,
-    });
-  }
-}, []);
+    if (applied > 0) {
+      notifications.show({
+        title: "Prefilled",
+        message: "We prefilled your form from the uploaded document.",
+        color: "blue",
+        autoClose: 4000,
+      });
+    }
+  }, []);
 
   const isFormComplete =
     firstName.trim() &&
@@ -116,13 +116,13 @@ useEffect(() => {
 
   function validateAll(): boolean {
     const e: Errors = {};
-    const f1 = validators.firstName(firstName);     if (f1) e.firstName = f1;
-    const f2 = validators.lastName(lastName);       if (f2) e.lastName = f2;
-    const f3 = validators.smoke(smoke);             if (f3) e.smoke = f3;
+    const f1 = validators.firstName(firstName); if (f1) e.firstName = f1;
+    const f2 = validators.lastName(lastName); if (f2) e.lastName = f2;
+    const f3 = validators.smoke(smoke); if (f3) e.smoke = f3;
     const f4 = validators.cigarettesPerDay(cigarettesPerDay, isSmoker); if (f4) e.cigarettesPerDay = f4;
-    const f5 = validators.height(height);           if (f5) e.height = f5;
-    const f6 = validators.weight(weight);           if (f6) e.weight = f6;
-    const f7 = validators.dob(dob);                 if (f7) e.dob = f7;
+    const f5 = validators.height(height); if (f5) e.height = f5;
+    const f6 = validators.weight(weight); if (f6) e.weight = f6;
+    const f7 = validators.dob(dob); if (f7) e.dob = f7;
 
     setErrors(e);
     Object.entries(e).forEach(([k, msg]) =>
@@ -149,7 +149,7 @@ useEffect(() => {
       cigarettes_per_day: isSmoker && cigarettesPerDay !== "" ? Number(cigarettesPerDay) : null,
       height_cm: Number(height),
       weight_kg: Number(weight),
-      date_of_birth: formatDDMMYYYY(dob),   
+      date_of_birth: formatDDMMYYYY(dob),
       sports: sports.map((r) => r.name.trim()).filter(Boolean),
     };
 
