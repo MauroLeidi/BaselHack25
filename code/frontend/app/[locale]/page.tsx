@@ -3,15 +3,13 @@
 import {
   Button,
   Container,
-  Group,
   Paper,
   Select,
   Stack,
   Text,
-  ThemeIcon,
   Title,
 } from "@mantine/core";
-import { IconChecklist, IconFileUpload, IconShieldCheck } from "@tabler/icons-react";
+import { IconChecklist, IconFileUpload } from "@tabler/icons-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -49,23 +47,12 @@ export default function LocaleHomePage() {
         return;
       }
 
-      console.log(res);
-
-      // Expected OCR payload (example):
-      // {
-      //   firstName: "Jane",
-      //   lastName: "Doe",
-      //   smokes: true,
-      //   cigarettes_per_day: 5,
-      //   height_cm: 172,
-      //   weight_kg: 64.5,
-      //   date_of_birth: "05.06.1999",
-      //   sports: ["Basketball", "Running"]
-      // }
       const ocrData = await res.json();
       console.log("OCR response:", ocrData);
-
-      sessionStorage.setItem("pax_form_prefill", JSON.stringify(ocrData));
+      sessionStorage.setItem(
+        "pax_form_prefill",
+        JSON.stringify(ocrData.data ?? ocrData)
+      );
 
       const qs = `?product=${encodeURIComponent(product)}`;
       router.push(`/${locale}/form${qs}`);
@@ -87,15 +74,44 @@ export default function LocaleHomePage() {
     <div
       style={{
         minHeight: "100dvh",
+        position: "relative",
         display: "grid",
         placeItems: "center",
         background:
           "radial-gradient(80rem 80rem at 20% -10%, rgba(94,68,255,0.06), transparent 50%), radial-gradient(80rem 80rem at 120% 120%, rgba(36,186,111,0.08), transparent 40%)",
       }}
     >
+      {/* Top-right Admin link with logo + text */}
+      <Link
+      href={`/${locale}/admin`}
+      style={{
+        position: "absolute",
+        top: 12,
+        right: 32,
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 8,
+        textDecoration: "none",
+        }}
+        aria-label="PAX Admin"
+      >
+      {/* keep SVG small and block so it centers cleanly */}
+      <Image
+        src="/pax_logo.svg"
+        alt="PAX"
+        width={46}
+        height={46}
+        style={{ display: "block" }}
+        priority
+      />
+      <Text size="lg" fw={700} c="pax" lh={1}>
+        Admin
+      </Text>
+      </Link>
+
       <Container size="sm">
         <Stack align="center" gap="lg">
-          <Image src="/pax_logo.jpeg" alt="PAX" width={120} height={40} priority />
+          <Image src="/pax_logo.svg" alt="PAX" width={120} height={40} priority />
 
           <Stack gap={4} align="center">
             <Title order={2}>PAX Application</Title>
@@ -160,16 +176,6 @@ export default function LocaleHomePage() {
                   {uploading ? "Reading document…" : "Upload photo or PDF"}
                 </Button>
               </Stack>
-
-              <Group gap={8}>
-                <ThemeIcon size="sm" radius="xl" color="paxGreen" variant="light">
-                  <IconShieldCheck size={16} />
-                </ThemeIcon>
-                <div style={{ flex: 1 }} />
-                <Link href={`/${locale}/admin`}>
-                  <Text size="sm">Admin</Text>
-                </Link>
-              </Group>
             </Stack>
           </Paper>
         </Stack>

@@ -23,7 +23,26 @@
     "remove": "Remove",
     "submit": "Submit",
     "errors": {
-      "required": "Please complete all required fields."
+      "title": "Validation error",
+      "required": "Please complete all required fields.",
+      "fix_fields": "Please fix the highlighted fields.",
+      "first_name_required": "First name is required.",
+      "last_name_required": "Last name is required.",
+      "name_invalid": "Name contains invalid characters.",
+      "smoke_required": "Please select whether you smoke.",
+      "cpd_required": "Please enter how many cigarettes you smoke per day.",
+      "cpd_min": "The value cannot be negative.",
+      "cpd_max": "Please enter a reasonable number (max 30).",
+      "height_required": "Please enter your height.",
+      "height_min": "Height seems too low.",
+      "height_max": "Height seems too high.",
+      "weight_required": "Please enter your weight.",
+      "weight_min": "Weight seems too low.",
+      "weight_max": "Weight seems too high.",
+      "dob_required": "Please select your date of birth.",
+      "dob_future": "Date of birth cannot be in the future.",
+      "age_max": "Age exceeds the maximum allowed limit (100 years).",
+      "age_min_exact": "You must be at least 1 year old."
     },
     "submitted": "Form submitted. Check console for payload."
   },

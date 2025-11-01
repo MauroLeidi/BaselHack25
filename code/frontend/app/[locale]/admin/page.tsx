@@ -4,20 +4,28 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
+import { notifications } from "@mantine/notifications";
 import {
   ActionIcon,
   Button,
   Container,
   Divider,
   Group,
+  Modal,
   Paper,
   Select,
   Stack,
   Text,
   Title,
   Tooltip,
+  FileInput,
+  TextInput
 } from "@mantine/core";
-import { IconChevronLeft, IconSend, IconSettings2 } from "@tabler/icons-react";
+import { useDisclosure } from "@mantine/hooks";
+import { IconChevronLeft, IconSend, IconFile, IconEye} from "@tabler/icons-react";
+import { Alert, Badge,Checkbox,  } from "@mantine/core";
+import { IconAlertTriangle } from "@tabler/icons-react";
+
 
 const PRODUCT_LABELS: Record<string, string> = {
   "pillar-3a": "Pillar 3a",
@@ -31,8 +39,8 @@ const PRODUCT_OPTIONS = [
   { value: "accident-insurance", label: "Accident insurance" },
 ];
 
-const ACCEPT =
-  ".doc,.docx,.xls,.xlsx,.csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv";
+
+
 
 export default function AdminPage() {
   const { locale } = useParams() as { locale: string };
@@ -41,40 +49,77 @@ export default function AdminPage() {
   const [file, setFile] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
 
+  const [opened, { open, close }] = useDisclosure(false); // modal state
   const inputRef = useRef<HTMLInputElement>(null);
-  const selectedLabel = product ? PRODUCT_LABELS[product] ?? product : null;
+const [ack, setAck] = useState(false);
+const [confirmText, setConfirmText] = useState("");
 
-  function pickFile() {
-    inputRef.current?.click();
-  }
-
-  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0] ?? null;
-    setFile(f);
-  }
-
-  async function handleSend() {
-    if (!product || sending) return;
+  async function handleSendConfirmed() {
+    if (!product || !file || sending) return;
+    close();
 
     try {
       setSending(true);
+      const text = await file.text();
+      const parsed = JSON.parse(text);
 
-      const form = new FormData();
-      form.append("product", product);
-      if (file) form.append("file", file, file.name);
+      const res = await fetch("http://localhost:8000/admin/update_rules", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(parsed),
+      });
 
-      // TODO: replace with real API endpoint
-      // const res = await fetch("/api/admin/send", { method: "POST", body: form });
-      // if (!res.ok) throw new Error("Send failed");
-      await new Promise((r) => setTimeout(r, 800)); // placeholder
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail ?? "Upload failed");
+      }
 
-      console.log("Sent:", { product, file: file?.name });
-      alert(`Sent for: ${selectedLabel}${file ? `\nFile: ${file.name}` : ""}`);
-      if (inputRef.current) inputRef.current.value = "";
+      const result = await res.json();
+
+      notifications.show({
+        title: "Rules updated",
+        message: result.message ?? "Success",
+        color: "green",
+        autoClose: 5000,
+      });
+
       setFile(null);
+      if (inputRef.current) inputRef.current.value = "";
+    } catch (err: any) {
+      notifications.show({
+        title: "Error",
+        message: err.message,
+        color: "red",
+        autoClose: 7000,
+      });
     } finally {
       setSending(false);
     }
+  }
+
+
+  function handlePreview() {
+    console.log("TODO")
+  }
+
+  function handleSendClick() {
+    if (!product) {
+      notifications.show({
+        title: "Missing product",
+        message: "Please select a product first.",
+        color: "orange",
+      });
+      return;
+    }
+    if (!file) {
+      notifications.show({
+        title: "Missing file",
+        message: "Please choose a file before sending.",
+        color: "orange",
+      });
+      return;
+    }
+    open(); // show confirmation popup
   }
 
   return (
@@ -93,7 +138,8 @@ export default function AdminPage() {
           top: 0,
           zIndex: 20,
           borderBottom: "1px solid var(--mantine-color-default-border)",
-          background: "color-mix(in srgb, var(--mantine-color-body) 82%, transparent)",
+          background:
+            "color-mix(in srgb, var(--mantine-color-body) 82%, transparent)",
           backdropFilter: "saturate(160%) blur(6px)",
         }}
       >
@@ -114,7 +160,7 @@ export default function AdminPage() {
               </Tooltip>
 
               <Image
-                src="/pax_logo.jpeg"
+                src="/pax_logo.svg"
                 alt="PAX"
                 width={90}
                 height={28}
@@ -134,7 +180,7 @@ export default function AdminPage() {
               Admin Console
             </Title>
             <Text c="dimmed" mt={4}>
-              Configure products and send
+              Upload rules & preview
             </Text>
           </div>
 
@@ -146,24 +192,14 @@ export default function AdminPage() {
             style={{
               width: "100%",
               background: "var(--mantine-color-body)",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06)",
+              boxShadow:
+                "0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06)",
             }}
           >
             <Stack gap="md">
-              <div>
-                <Text size="sm" c="dimmed">
-                  Product
-                </Text>
-                {selectedLabel ? (
-                  <Title order={4} mt={2} style={{ fontWeight: 600 }}>
-                    {selectedLabel}
-                  </Title>
-                ) : (
-                  <Text mt={2} c="dimmed" style={{ fontStyle: "italic" }}>
-                    Select target
-                  </Text>
-                )}
-              </div>
+              <Text size="sm" c="dimmed">
+                Product
+              </Text>
 
               <Select
                 data={PRODUCT_OPTIONS}
@@ -174,7 +210,9 @@ export default function AdminPage() {
                 radius="md"
                 variant="filled"
                 aria-label="Choose a product"
-                styles={{ input: { background: "var(--mantine-color-default)" } }}
+                styles={{
+                  input: { background: "var(--mantine-color-default)" },
+                }}
               />
 
               <Divider
@@ -184,51 +222,115 @@ export default function AdminPage() {
                   borderColor: "var(--mantine-color-default-border)",
                 }}
               />
-
-              <input
+              <Text size="sm" c="dimmed">
+                Upload rule file
+              </Text>
+              <FileInput
+                placeholder="Select file"
+                leftSection={<IconFile size={18} />}
+                accept="application/json, .json"
+                value={file}
+                onChange={setFile}
                 ref={inputRef}
-                type="file"
-                accept={ACCEPT}
-                onChange={onFileChange}
-                style={{ display: "none" }}
+                clearable
               />
 
-              <Group gap="sm" align="stretch" grow>
+              {file && (
+                <Text size="sm" c="dimmed">
+                  Selected: {file.name} · {(file.size / 1024).toFixed(0)} KB
+                </Text>
+              )}
+
+              <Group justify="center" mt="md" gap="sm">
                 <Button
-                  variant="default"
-                  leftSection={<IconSettings2 size={16} />}
-                  onClick={pickFile}
+                  variant="light"
+                  color="pax"
                   size="md"
-                  fullWidth
-                  aria-label="Choose rule file"
+                  disabled={!file}
+                  onClick={handlePreview}
                 >
-                  Choose file
+                  Preview
                 </Button>
 
                 <Button
                   variant="filled"
                   color="paxGreen"
-                  leftSection={<IconSend size={16} />}
                   size="md"
-                  disabled={!product}
+                  disabled={!product || !file}
                   loading={sending}
-                  onClick={handleSend}
-                  fullWidth
-                  aria-label="Send"
+                  onClick={handleSendClick}
                 >
-                  Send
+                  Update
                 </Button>
               </Group>
-
-              {file ? (
-                <Text size="sm" c="dimmed">
-                  Selected: {file.name} · {(file.size / 1024).toFixed(0)} KB
-                </Text>
-              ) : null}
             </Stack>
           </Paper>
         </Stack>
       </Container>
+
+      {/* Confirmation modal */}
+     <Modal
+  opened={opened}
+  onClose={() => { setAck(false); close(); }}
+  centered
+  radius="lg"
+  size="sm"
+  withCloseButton
+  title={
+    <Group gap="xs">
+      <IconAlertTriangle size={18} color="var(--mantine-color-red-6)" />
+      <Text fw={600}>Send and overwrite rules?</Text>
+    </Group>
+  }
+  overlayProps={{ blur: 2, opacity: 0.35 }}
+  closeOnEscape
+  closeOnClickOutside={false}
+>
+  <Stack gap="sm">
+   
+
+    <Group gap="xs">
+      <Text size="sm" c="dimmed">Product:</Text>
+      <Badge variant="light">{product ?? "—"}</Badge>
+      {file && (
+        <>
+          <Text size="sm" c="dimmed">File:</Text>
+          <Badge variant="light">{file.name}</Badge>
+        </>
+      )}
+    </Group>
+
+    <Checkbox
+      checked={ack}
+      onChange={(e) => setAck(e.currentTarget.checked)}
+      label="I understand"
+      radius="sm"
+    />
+
+    <Group grow gap="sm" mt="md" w="100%">
+  <Button
+    variant="default"
+    fullWidth
+    onClick={() => { setAck(false); close(); }}
+  >
+    Cancel
+  </Button>
+
+  <Button
+    color="red"
+    variant="filled"
+    fullWidth
+    onClick={handleSendConfirmed}
+    disabled={!ack || !product || !file}
+    loading={sending}
+  >
+    Send & overwrite
+  </Button>
+</Group>
+
+  </Stack>
+</Modal>
+
     </div>
   );
 }

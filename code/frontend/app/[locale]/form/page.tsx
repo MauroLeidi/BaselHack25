@@ -15,14 +15,15 @@ import {
   Text,
   TextInput,
   Title,
-  Tooltip
+  Tooltip,
 } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { IconChevronLeft, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { startTransition, useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { notifications } from "@mantine/notifications";
 
 type Smoke = "yes" | "no" | null;
 type Level = "hobby" | "competitive";
@@ -35,127 +36,278 @@ export default function OnlineFormPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [smoke, setSmoke] = useState<Smoke>(null);
-  const [height, setHeight] = useState<number | "">(""); // <-- height first
-  const [weight, setWeight] = useState<number | "">(""); // <-- then weight
+  const [height, setHeight] = useState<number | "">("");
+  const [weight, setWeight] = useState<number | "">("");
   const [sports, setSports] = useState<SportEntry[]>([{ name: "", level: "hobby" }]);
 
   const [cigarettesPerDay, setCigarettesPerDay] = useState<number | "">("");
-  const [dob, setDob] = useState<Date | null>(null);
+  const [dob, setDob] = useState<string | null>(null);
+
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const shownNotiIdsRef = useRef<Set<string>>(new Set()); // avoid duplicate popups
 
   const isSmoker = smoke === "yes";
 
   const sportSuggestions = [
-    "Basketball", "Football", "Running", "Cycling", "Swimming",
-    "Climbing", "Skiing", "Snowboarding", "Martial arts",
-    "Diving", "Paragliding", "Motorsport", "Rugby", "Tennis"
+    "Basketball",
+    "Football",
+    "Running",
+    "Cycling",
+    "Swimming",
+    "Climbing",
+    "Skiing",
+    "Snowboarding",
+    "Martial arts",
+    "Diving",
+    "Paragliding",
+    "Motorsport",
+    "Rugby",
+    "Tennis",
   ];
 
-
-
-  function addSport() { setSports((s) => [...s, { name: "", level: "hobby" }]); }
-  function removeSport(i: number) { setSports((s) => s.filter((_, idx) => idx !== i)); }
+  function addSport() {
+    setSports((s) => [...s, { name: "", level: "hobby" }]);
+  }
+  function removeSport(i: number) {
+    setSports((s) => s.filter((_, idx) => idx !== i));
+  }
   function updateSport(i: number, patch: Partial<SportEntry>) {
     setSports((s) => s.map((row, idx) => (idx === i ? { ...row, ...patch } : row)));
   }
 
-  function yearsAgo(n: number) { const d = new Date(); d.setFullYear(d.getFullYear() - n); return d; }
-  function ageFrom(d: Date): number {
-    const now = new Date();
-    let a = now.getFullYear() - d.getFullYear();
-    const mmdd = (now.getMonth() + 1) * 100 + now.getDate();
-    const mmddB = (d.getMonth() + 1) * 100 + d.getDate();
-    if (mmdd < mmddB) a--;
-    return a;
+  function yearsAgo(n: number) {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - n);
+    return d;
   }
-  function formatDDMMYYYY(d: Date) {
-    const dd = String(d.getDate()).padStart(2, "0");
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const yyyy = d.getFullYear();
-    return `${dd}.${mm}.${yyyy}`;
+  function formatDDMMYYYY(d: string | null) {
+    if (!d) return "";
+    const [year, month, day] = d.split("-");
+    return `${day}.${month}.${year}`;
   }
 
-  function validate(): boolean {
-    const errs: Record<string, string> = {};
-
-    if (isSmoker) {
-      const v = cigarettesPerDay === "" ? null : Number(cigarettesPerDay);
-      if (v === null || v < 0) errs.cigarettesPerDay = "cigarettes_per_day must be 0 or greater";
-      else if (v > 30) errs.cigarettesPerDay = "cigarettes_per_day cannot exceed 30";
+  // ---- notifications helpers ----
+  function notifyErrorOnce(id: string, title: string, message: string) {
+    if (shownNotiIdsRef.current.has(id)) return;
+    notifications.show({
+      id,
+      title,
+      message,
+      color: "red",
+      autoClose: 5000,
+      withBorder: true,
+    });
+    shownNotiIdsRef.current.add(id);
+  }
+  function clearErrorNoti(id: string) {
+    if (shownNotiIdsRef.current.has(id)) {
+      notifications.hide(id);
+      shownNotiIdsRef.current.delete(id);
     }
+  }
 
-    if (height !== "") {
-      const v = Number(height);
-      if (v < 50) errs.height = "height_cm must be at least 50 cm";
-      else if (v > 250) errs.height = "height_cm cannot exceed 250 cm";
-    }
+  const NAME_REGEX = /^\p{L}+(?:[ '\-]\p{L}+)*$/u;
 
-    if (weight !== "") {
-      const v = Number(weight);
-      if (v < 2) errs.weight = "weight_kg must be at least 2 kg";
-      else if (v > 300) errs.weight = "weight_kg cannot exceed 300 kg";
-    }
+  
+  // ---- field validators (return message or null) ----
+  const validators = useMemo(
+    () => ({
+      firstName: (v: string) => {
+        const val = v.trim();
+        if (val.length === 0) return t("errors.first_name_required");
+        if (!NAME_REGEX.test(val)) return t("errors.name_invalid");
+        return null;
+      },
+      lastName: (v: string) => {
+        const val = v.trim();
+        if (val.length === 0) return t("errors.last_name_required");
+        if (!NAME_REGEX.test(val)) return t("errors.name_invalid");
+        return null;
+      },
+      smoke: (v: Smoke) => (v === null ? t("errors.smoke_required") : null),
+      cigarettesPerDay: (v: number | "" , smoker: boolean) => {
+        if (!smoker) return null;
+        if (v === "") return t("errors.cpd_required");
+        const n = Number(v);
+        if (Number.isNaN(n) || n < 0) return t("errors.cpd_min");
+        if (n > 30) return t("errors.cpd_max");
+        return null;
+      },
+      height: (v: number | "") => {
+        if (v === "") return t("errors.height_required");
+        const n = Number(v);
+        if (n < 50) return t("errors.height_min");
+        if (n > 250) return t("errors.height_max");
+        return null;
+      },
+      weight: (v: number | "") => {
+        if (v === "") return t("errors.weight_required");
+        const n = Number(v);
+        if (n < 2) return t("errors.weight_min");
+        if (n > 300) return t("errors.weight_max");
+        return null;
+      },
+      dob: (v: Date | null | string) => {
+      const d = (v);
+      if (!d) return t("errors.dob_required");
 
-    if (!dob) {
-      errs.dob = "date_of_birth is required";
-    } else {
       const now = new Date();
-      if (dob > now) errs.dob = "date_of_birth cannot be in the future";
-      const a = ageFrom(dob);
-      if (a < 1) errs.dob = "age must be at least 1 year";
-      else if (a > 100) errs.dob = "age cannot exceed 100 years";
-    }
+      const minDob = yearsAgo(100);
+      const maxDob = yearsAgo(1);
 
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
+      if (d > now) return t("errors.dob_future");
+      if (d < minDob) return t("errors.age_max");
+      if (d > maxDob) return t("errors.age_min_exact");
+      return null;
+    },
+
+    }),
+    [t]
+  );
+
+  function setFieldError(name: string, message: string | null) {
+    setErrors((prev) => {
+      const next = { ...prev };
+      if (message) next[name] = message;
+      else delete next[name];
+      return next;
+    });
+    const notiId = `err:${name}`;
+    if (message) notifyErrorOnce(notiId, t("errors.title") ?? "Validation error", message);
+    else clearErrorNoti(notiId);
   }
 
+  // ---- blur handlers to show notifications immediately ----
+  function onBlurFirstName() {
+    setFieldError("firstName", validators.firstName(firstName));
+  }
+  function onBlurLastName() {
+    setFieldError("lastName", validators.lastName(lastName));
+  }
+  function onBlurHeight() {
+    setFieldError("height", validators.height(height));
+  }
+  function onBlurWeight() {
+    setFieldError("weight", validators.weight(weight));
+  }
+  function onBlurCPD() {
+    setFieldError("cigarettesPerDay", validators.cigarettesPerDay(cigarettesPerDay, isSmoker));
+  }
+
+  // Clear CPD error when toggling non-smoker
   useEffect(() => {
+    if (!isSmoker) {
+      setCigarettesPerDay("");
+      setFieldError("cigarettesPerDay", null);
+    }
+  }, [isSmoker]);
+
+  // Prefill + notification (unchanged except dob is Date now)
+  useEffect(() => {
+    const raw = sessionStorage.getItem("pax_form_prefill");
+    if (!raw) return;
+
+    let applied = 0;
     try {
-      const raw = sessionStorage.getItem("pax_form_prefill");
-      if (!raw) return;
       const data = JSON.parse(raw) as Partial<{
         first_name: string;
+        firstName: string;
         last_name: string;
+        lastName: string;
         smokes: boolean;
+        smoke: "yes" | "no";
         cigarettes_per_day: number | null;
+        cigarettesPerDay: number | null;
         height_cm: number | null;
+        height: number | null;
         weight_kg: number | null;
+        weight: number | null;
         date_of_birth: string | null;
+        dob: string | null; // "DD.MM.YYYY" | "YYYY-MM-DD"
         sports: string[];
       }>;
 
+      if (data.first_name || data.firstName) {
+        setFirstName((data.first_name ?? data.firstName ?? "").trim());
+        applied++;
+      }
+      if (data.last_name || data.lastName) {
+        setLastName((data.last_name ?? data.lastName ?? "").trim());
+        applied++;
+      }
 
-      startTransition(() => {
-        if (data.first_name) setFirstName(data.first_name);
-        if (data.last_name) setLastName(data.last_name);
-        if (typeof data.smokes === "boolean") setSmoke(data.smokes ? "yes" : "no");
-        if (typeof data.cigarettes_per_day === "number") setCigarettesPerDay(data.cigarettes_per_day);
-        if (typeof data.height_cm === "number") setHeight(data.height_cm);
-        if (typeof data.weight_kg === "number") setWeight(data.weight_kg);
+      if (typeof data.smokes === "boolean") {
+        setSmoke(data.smokes ? "yes" : "no");
+        applied++;
+      } else if (data.smoke === "yes" || data.smoke === "no") {
+        setSmoke(data.smoke);
+        applied++;
+      }
 
-        if (data.date_of_birth) {
-          const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(data.date_of_birth);
-          if (m) {
-            const d = new Date(+m[3], +m[2] - 1, +m[1]);
-            if (!Number.isNaN(d.getTime())) setDob(d);
-          }
+      if (data.cigarettes_per_day != null) {
+        setCigarettesPerDay(Number(data.cigarettes_per_day));
+        applied++;
+      } else if (data.cigarettesPerDay != null) {
+        setCigarettesPerDay(Number(data.cigarettesPerDay));
+        applied++;
+      }
+
+      if (data.height_cm != null) {
+        setHeight(Number(data.height_cm));
+        applied++;
+      } else if (data.height != null) {
+        setHeight(Number(data.height));
+        applied++;
+      }
+
+      if (data.weight_kg != null) {
+        setWeight(Number(data.weight_kg));
+        applied++;
+      } else if (data.weight != null) {
+        setWeight(Number(data.weight));
+        applied++;
+      }
+
+      if (Array.isArray(data.sports) && data.sports.length > 0) {
+        setSports(data.sports.map((name) => ({ name, level: "hobby" as const })));
+        applied++;
+      }
+
+      const rawDob = data.date_of_birth ?? data.dob;
+      if (rawDob) {
+        let parsed: Date | null = null;
+        if (/^\d{4}-\d{2}-\d{2}$/.test(rawDob)) {
+          const [y, m, d] = rawDob.split("-").map(Number);
+          parsed = new Date(y, m - 1, d);
+        } else if (/^\d{2}\.\d{2}\.\d{4}$/.test(rawDob)) {
+          const [d, m, y] = rawDob.split(".").map(Number);
+          parsed = new Date(y, m - 1, d);
+        } else {
+          const dt = new Date(rawDob);
+          if (!isNaN(dt.getTime())) parsed = dt;
         }
-
-        if (Array.isArray(data.sports) && data.sports.length > 0) {
-          setSports(data.sports.map((name) => ({ name, level: "hobby" })));
+        if (parsed) {
+          setDob(parsed);
+          applied++;
         }
-      });
-
-
-      sessionStorage.removeItem("pax_form_prefill");
+      }
     } catch (e) {
-      console.warn("Failed to apply prefill:", e);
+      console.warn("prefill parse error", e);
+    } finally {
+      sessionStorage.removeItem("pax_form_prefill");
+    }
+
+    if (applied > 0) {
+      notifications.show({
+        title: "Prefilled",
+        message: "We prefilled your form from the uploaded document.",
+        color: "blue",
+        autoClose: 4000,
+      });
     }
   }, []);
 
-
-
+  // Overall completeness gate
   const isFormComplete =
     firstName.trim().length > 0 &&
     lastName.trim().length > 0 &&
@@ -165,14 +317,69 @@ export default function OnlineFormPage() {
     dob !== null &&
     (!isSmoker || cigarettesPerDay !== "");
 
+  // Validate all fields (used on submit)
+  function validateAll(): boolean {
+    const e: Record<string, string> = {};
+
+    const f1 = validators.firstName(firstName);
+    if (f1) e.firstName = f1;
+
+    const f2 = validators.lastName(lastName);
+    if (f2) e.lastName = f2;
+
+    const f3 = validators.smoke(smoke);
+    if (f3) e.smoke = f3;
+
+    const f4 = validators.cigarettesPerDay(cigarettesPerDay, isSmoker);
+    if (f4) e.cigarettesPerDay = f4;
+
+    const f5 = validators.height(height);
+    if (f5) e.height = f5;
+
+    const f6 = validators.weight(weight);
+    if (f6) e.weight = f6;
+
+    const f7 = validators.dob(dob);
+    if (f7) e.dob = f7;
+
+    setErrors(e);
+
+    // Push notifications for any new errors not already shown
+    Object.entries(e).forEach(([k, msg]) => {
+      notifyErrorOnce(`err:${k}`, t("errors.title") ?? "Validation error", msg);
+    });
+
+    return Object.keys(e).length === 0;
+  }
+
   async function handleSubmit() {
-    if (!isFormComplete) { setErrors((e) => ({ ...e, form: t("errors.required") })); return; }
-    if (!validate()) return;
+    console.log("[DOB:state before payload]", dob, {
+    type: typeof dob,
+    isDate: dob instanceof Date,
+    iso: dob ? dob.toISOString() : null,
+  });
+    if (!isFormComplete) {
+      setErrors((prev) => ({ ...prev, form: t("errors.required") }));
+      notifications.show({
+        title: t("errors.title") ?? "Form incomplete",
+        message: t("errors.required"),
+        color: "red",
+        autoClose: 6000,
+      });
+      return;
+    }
 
-    const cleanedSports = sports
-      .map((r) => r.name.trim())
-      .filter((name) => name.length > 0);
+    if (!validateAll()) {
+      notifications.show({
+        title: t("errors.title") ?? "Validation error",
+        message: t("errors.fix_fields") ?? "Please fix the highlighted fields.",
+        color: "red",
+        autoClose: 6000,
+      });
+      return;
+    }
 
+    const cleanedSports = sports.map((r) => r.name.trim()).filter(Boolean);
     const payload = {
       first_name: firstName.trim(),
       last_name: lastName.trim(),
@@ -180,18 +387,61 @@ export default function OnlineFormPage() {
       cigarettes_per_day: isSmoker && cigarettesPerDay !== "" ? Number(cigarettesPerDay) : null,
       height_cm: Number(height),
       weight_kg: Number(weight),
-      date_of_birth: dob ? formatDDMMYYYY(dob) : null,
+      date_of_birth: formatDDMMYYYY(dob), // "DD.MM.YYYY"
       sports: cleanedSports,
     };
+    console.log("[Payload to backend]", payload);
+    console.table(payload);
 
-    console.log("SUBMIT payload (object):", payload);
-    console.log("SUBMIT payload (json):\n", JSON.stringify(payload, null, 2));
+    try {
+      const res = await fetch("http://localhost:8000/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      console.log("dob: sent as", formatDDMMYYYY(dob));
 
-    alert(t("submitted"));
+
+      const text = await res.text();
+      const json = (() => {
+        try {
+          return JSON.parse(text);
+        } catch {
+          return { detail: text };
+        }
+      })();
+
+      if (!res.ok) {
+        notifications.show({
+          title: "Predict failed",
+          message: json.detail ?? "Unknown error",
+          color: "red",
+          autoClose: 6000,
+        });
+        return;
+      }
+
+      sessionStorage.setItem("pax_predict_result", JSON.stringify(json));
+
+      notifications.show({
+        title: t("title"),
+        message: t("submitted"),
+        color: "green",
+        autoClose: 2500,
+      });
+
+      window.location.assign(`/${locale}/result`);
+    } catch (e: any) {
+      notifications.show({
+        title: "Network error",
+        message: e?.message ?? "Failed to reach server",
+        color: "red",
+        autoClose: 6000,
+      });
+    }
   }
 
   return (
-
     <div
       style={{
         minHeight: "100dvh",
@@ -219,7 +469,9 @@ export default function OnlineFormPage() {
         <Stack align="center" gap="lg">
           <Stack gap={4} align="center">
             <Title order={2}>{t("title")}</Title>
-            <Text c="dimmed" ta="center">{t("subtitle")}</Text>
+            <Text c="dimmed" ta="center">
+              {t("subtitle")}
+            </Text>
             <LanguageSwitcher />
           </Stack>
 
@@ -231,14 +483,18 @@ export default function OnlineFormPage() {
                   placeholder="Jane"
                   value={firstName}
                   onChange={(e) => setFirstName(e.currentTarget.value)}
+                  onBlur={onBlurFirstName}
                   required
+                  error={errors.firstName}
                 />
                 <TextInput
                   label={t("lastName")}
                   placeholder="Doe"
                   value={lastName}
                   onChange={(e) => setLastName(e.currentTarget.value)}
+                  onBlur={onBlurLastName}
                   required
+                  error={errors.lastName}
                 />
               </Group>
 
@@ -249,19 +505,21 @@ export default function OnlineFormPage() {
                   onChange={(v) => {
                     const val = (v as Smoke) ?? null;
                     setSmoke(val);
-                    if (val !== "yes") setCigarettesPerDay("");
                   }}
+                  onBlur={() => setFieldError("smoke", validators.smoke(smoke))}
                   data={[
                     { value: "no", label: t("no") },
-                    { value: "yes", label: t("yes") }
+                    { value: "yes", label: t("yes") },
                   ]}
                   required
+                  error={errors.smoke}
                 />
 
                 <NumberInput
                   label={t("cigarettes_per_day")}
                   value={cigarettesPerDay}
                   onChange={setCigarettesPerDay}
+                  onBlur={onBlurCPD}
                   min={1}
                   max={30}
                   step={1}
@@ -269,7 +527,6 @@ export default function OnlineFormPage() {
                   required={isSmoker}
                   error={errors.cigarettesPerDay}
                 />
-
               </Group>
 
               <Group grow>
@@ -278,6 +535,7 @@ export default function OnlineFormPage() {
                   description="cm"
                   value={height}
                   onChange={setHeight}
+                  onBlur={onBlurHeight}
                   min={50}
                   max={250}
                   required
@@ -288,6 +546,7 @@ export default function OnlineFormPage() {
                   description="kg"
                   value={weight}
                   onChange={setWeight}
+                  onBlur={onBlurWeight}
                   min={2}
                   max={300}
                   precision={1}
@@ -298,19 +557,24 @@ export default function OnlineFormPage() {
               </Group>
 
               <Group grow>
-                <DatePickerInput
-                  label={t("date_of_birth")}
-                  placeholder="DD.MM.YYYY"
-                  value={dob}
-                  onChange={setDob}
-                  valueFormat="DD.MM.YYYY"
-                  editable="false"
-                  minDate={yearsAgo(100)}
-                  maxDate={yearsAgo(1)}
-                  clearable={false}
-                  error={errors.dob}
-                  required
-                />
+              <DatePickerInput
+                label={t("date_of_birth")}
+                placeholder="DD.MM.YYYY"
+                value={dob}
+                onChange={(d) => {
+                setDob(d);
+                console.log("dob formatted: ", formatDDMMYYYY(d));
+                setFieldError("dob", validators.dob(d));
+              }}
+                            valueFormat="DD.MM.YYYY"
+                editable="false"          // boolean, not "false"
+                minDate={yearsAgo(100)}
+                maxDate={yearsAgo(1)}
+                clearable={false}
+                error={errors.dob}
+                required
+              />
+
               </Group>
 
               <Divider label={t("sport_section")} />
@@ -332,7 +596,7 @@ export default function OnlineFormPage() {
                       onChange={(v) => updateSport(i, { level: (v as Level) ?? "hobby" })}
                       data={[
                         { value: "hobby", label: t("sport_hobby") },
-                        { value: "competitive", label: t("sport_competitive") }
+                        { value: "competitive", label: t("sport_competitive") },
                       ]}
                       w={220}
                     />
