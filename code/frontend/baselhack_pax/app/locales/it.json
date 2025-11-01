@@ -1,0 +1,56 @@
+{
+  "form": {
+    "title": "Questionario sanitario",
+    "subtitle": "Rispondi in modo veritiero. I campi obbligatori devono essere compilati.",
+    "firstName": "Nome",
+    "lastName": "Cognome",
+    "smoke": "Fumi?",
+    "yes": "Sì",
+    "no": "No",
+    "age": "Età",
+    "weight": "Peso",
+    "height": "Altezza",
+    "date_of_birth": "Data di nascita",
+    "cigarettes_per_day": "Sigarette al giorno",
+    "bmi": "BMI (calcolato automaticamente)",
+    "sport_section": "Sport",
+    "sport_name": "Disciplina sportiva",
+    "sport_placeholder": "es. Basket, Corsa, Arrampicata…",
+    "sport_level": "Livello",
+    "sport_hobby": "Hobby / Amatoriale",
+    "sport_competitive": "Agonistico",
+    "add_sport": "Aggiungi sport",
+    "remove": "Rimuovi",
+    "submit": "Invia",
+    "errors": {
+      "required": "Completa tutti i campi obbligatori."
+    },
+    "submitted": "Modulo inviato. Controlla la console per il payload."
+  },
+  "upload": {
+    "title": "Carica foto / PDF del modulo",
+    "subtitle": "Supportati: PDF, JPG, PNG. Estrarremo i campi e proseguiremo con l’underwriting.",
+    "choose": "Scegli file",
+    "placeholder": "Seleziona un PDF o un’immagine",
+    "notes": "Note (opzionale)",
+    "notes_ph": "C’è qualcosa da segnalare?",
+    "uploadBtn": "Carica",
+    "done": "File caricato. Estrarremo i campi e avvieremo l’underwriting.",
+    "footnote": "Assicurati che la foto sia nitida e con tutti gli angoli visibili.",
+    "errors": {
+      "noFile": "Seleziona prima un file.",
+      "failed": "Caricamento non riuscito (stato: {status}).",
+      "generic": "Caricamento non riuscito. Riprova."
+    },
+    "tabUpload": "Carica",
+    "tabCamera": "Fotocamera",
+    "camera": {
+      "opening": "Apertura fotocamera…",
+      "error": "Impossibile accedere alla fotocamera. Controlla i permessi o usa il caricamento file.",
+      "take": "Scatta foto",
+      "flip": "Cambia fotocamera",
+      "close": "Chiudi",
+      "retake": "Riscatta"
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "form": {
+    "title": "Gesundheitsfragebogen",
+    "subtitle": "Bitte beantworten Sie die Fragen wahrheitsgemäß. Pflichtfelder müssen ausgefüllt werden.",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "smoke": "Rauchen Sie?",
+    "yes": "Ja",
+    "no": "Nein",
+    "age": "Alter",
+    "weight": "Gewicht",
+    "height": "Größe",
+    "cigarettes_per_day": "Zigaretten pro Tag",
+    "date_of_birth": "Geburtsdatum",
+    "bmi": "BMI (automatisch berechnet)",
+    "sport_section": "Sport",
+    "sport_name": "Sportart",
+    "sport_placeholder": "z. B. Basketball, Laufen, Klettern …",
+    "sport_level": "Niveau",
+    "sport_hobby": "Hobby / Freizeit",
+    "sport_competitive": "Wettkampf",
+    "add_sport": "Sport hinzufügen",
+    "remove": "Entfernen",
+    "submit": "Senden",
+    "errors": {
+      "required": "Bitte füllen Sie alle Pflichtfelder aus."
+    },
+    "submitted": "Formular gesendet. Payload in der Konsole prüfen."
+  },
+  "upload": {
+    "title": "Foto / PDF des Formulars hochladen",
+    "subtitle": "Unterstützt: PDF, JPG, PNG. Wir extrahieren die Felder und fahren mit dem Underwriting fort.",
+    "choose": "Datei auswählen",
+    "placeholder": "PDF oder Bild auswählen",
+    "notes": "Notizen (optional)",
+    "notes_ph": "Gibt es etwas zu beachten?",
+    "uploadBtn": "Hochladen",
+    "done": "Datei hochgeladen. Wir extrahieren die Felder und starten das Underwriting.",
+    "footnote": "Achten Sie auf ein scharfes Foto, alle Ecken sichtbar.",
+    "errors": {
+      "noFile": "Bitte zuerst eine Datei auswählen.",
+      "failed": "Upload fehlgeschlagen (Status: {status}).",
+      "generic": "Upload fehlgeschlagen. Bitte erneut versuchen."
+    },
+    "tabUpload": "Upload",
+    "tabCamera": "Kamera",
+    "camera": {
+      "opening": "Kamera wird geöffnet…",
+      "error": "Zugriff auf die Kamera nicht möglich. Berechtigungen prüfen oder Upload verwenden.",
+      "take": "Foto aufnehmen",
+      "flip": "Kamera wechseln",
+      "close": "Schließen",
+      "retake": "Erneut aufnehmen"
+    }
+  }
+}
