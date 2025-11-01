@@ -21,6 +21,7 @@ class FormData(BaseModel):
     weight_kg: Optional[float] = Field(None, description="Weight in kilograms")
     date_of_birth: Optional[str] = Field(None, description="The birth year of the person in format DD.MM.YYYY")
     sports: Optional[List[str]] = Field(None, description="List of sports the person practices")
+    insurance_price: Optional[float] = Field(None, description="Price of the insurance in CHF (optional)")
 
 def get_insurance_data(form_data: FormData):
     height_m = form_data.height_cm / 100
@@ -32,7 +33,8 @@ def get_insurance_data(form_data: FormData):
         'BMI': BMI,
         'AGE': AGE,
         'SMOKER': form_data.smokes,
-        'PRACTICE_SPORT': len(form_data.sports) > 0
+        'PRACTICE_SPORT': len(form_data.sports) > 0,
+        'PRICE_INSURANCE': form_data.insurance_price
     }
 
 
@@ -84,21 +86,23 @@ class InsuranceModel:
         
         # Prepare data for prediction
         input_data = np.array([[data["BMI"], data["AGE"], data["SMOKER"], data["PRACTICE_SPORT"]]])
+        base_price = data["PRICE_INSURANCE"]
         
         # Prediction
         predicted_price = self.rf_model.predict(input_data)[0]
+
         
         # Calculate adjustment
-        difference = predicted_price - self.base_price
+        difference = predicted_price - base_price
 
         if difference >= 0:
-            adjustment_percentage = (difference / self.base_price) * 100
+            adjustment_percentage = (difference / base_price) * 100
         else:
             adjustment_percentage = 0
         
         return PredictionOutput(
             predicted_price=round(predicted_price, 2),
-            base_price=round(float(self.base_price), 2),
+            base_price=round(float(base_price), 2),
             adjustment_percentage=round(adjustment_percentage, 2),
             adjustment_euro=round(difference, 2)
         )

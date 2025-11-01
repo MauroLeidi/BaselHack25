@@ -15,6 +15,7 @@ dependencies:
   - pydantic
   - python-dotenv
   - python-multipart
+  - seaborn
   - pip
   - pip:
       # In case you still need pip-only packages, list them here
