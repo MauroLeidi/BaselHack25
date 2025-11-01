@@ -9,11 +9,20 @@ from dotenv import load_dotenv
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware # 1. Import Middleware
 from decide import predict_decision,replace_rule_table
+from utils import insurance_model, InsuranceInput, PredictionOutput
+from contextlib import asynccontextmanager
 
 load_dotenv()
 
 
-app = FastAPI(title="Form Processing API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Loading model")
+    insurance_model.load_model()
+    yield
+
+app = FastAPI(lifespan=lifespan)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],      # Permette tutte le origini
@@ -21,6 +30,9 @@ app.add_middleware(
     allow_methods=["*"],                # Permette tutti i metodi (GET, POST, PUT, DELETE, OPTIONS, etc.)
     allow_headers=["*"],                # Permette tutti gli header (incluso Content-Type)
 )
+
+
+
 
 # Initialize OpenAI client
 client = OpenAI()
@@ -149,6 +161,26 @@ async def predict(form_data: FormData):
         "decision": decision,
         "reason": comment
     })
+
+@app.post("/predict-adjustment", response_model=PredictionOutput)
+async def predict_adjustment(data: InsuranceInput):
+    """
+    Predice l'aggiustamento del prezzo assicurativo basato sui dati del cliente.
+    """
+    if not insurance_model.is_loaded():
+        raise HTTPException(
+            status_code=500, 
+            detail="Modello non caricato correttamente"
+        )
+    
+    try:
+        return insurance_model.calculate_price_adjustment(data)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Errore durante la predizione: {str(e)}"
+        )
+
 
 @app.get("/health")
 async def health_check():

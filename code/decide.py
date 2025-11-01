@@ -111,7 +111,7 @@ def predict_decision(form_data):
         'BMI': BMI,
         'AGE': AGE,
         'SMOKER': form_data['smokes'],
-        'PRACTICE_SPORT': True  # Could be from another field if available
+        'PRACTICE_SPORT': len(form_data['sports']) > 0
     }
 
     decision, _, comment, _ = decide_and_learn(rules_df, x_input, learn_flag=False)
