@@ -1,30 +1,28 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { useEffect, startTransition } from "react";
+import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 import {
+  ActionIcon,
+  Autocomplete,
   Button,
   Container,
+  Divider,
   Group,
   NumberInput,
+  Paper,
   Select,
   Stack,
   Text,
   TextInput,
   Title,
-  Autocomplete,
-  ActionIcon,
-  Divider,
-  Paper,
   Tooltip
 } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
-import { IconTrash, IconPlus } from "@tabler/icons-react";
-import { useState } from "react";
-import LanguageSwitcher from "@/app/components/LanguageSwitcher";
+import { IconChevronLeft, IconPlus, IconTrash } from "@tabler/icons-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { IconChevronLeft } from "@tabler/icons-react";
 import { useParams } from "next/navigation";
+import { startTransition, useEffect, useState } from "react";
 
 type Smoke = "yes" | "no" | null;
 type Level = "hobby" | "competitive";
@@ -35,11 +33,11 @@ export default function OnlineFormPage() {
   const t = useTranslations("form");
 
   const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName]   = useState("");
-  const [smoke, setSmoke]         = useState<Smoke>(null);
-  const [height, setHeight]       = useState<number | "">(""); // <-- height first
-  const [weight, setWeight]       = useState<number | "">(""); // <-- then weight
-  const [sports, setSports]       = useState<SportEntry[]>([{ name: "", level: "hobby" }]);
+  const [lastName, setLastName] = useState("");
+  const [smoke, setSmoke] = useState<Smoke>(null);
+  const [height, setHeight] = useState<number | "">(""); // <-- height first
+  const [weight, setWeight] = useState<number | "">(""); // <-- then weight
+  const [sports, setSports] = useState<SportEntry[]>([{ name: "", level: "hobby" }]);
 
   const [cigarettesPerDay, setCigarettesPerDay] = useState<number | "">("");
   const [dob, setDob] = useState<Date | null>(null);
@@ -124,40 +122,40 @@ export default function OnlineFormPage() {
         height_cm: number | null;
         weight_kg: number | null;
         date_of_birth: string | null;
-        sports: string[];            
+        sports: string[];
       }>;
 
-   
-    startTransition(() => {
-      if (data.first_name) setFirstName(data.first_name);
-      if (data.last_name) setLastName(data.last_name);
-      if (typeof data.smokes === "boolean") setSmoke(data.smokes ? "yes" : "no");
-      if (typeof data.cigarettes_per_day === "number") setCigarettesPerDay(data.cigarettes_per_day);
-      if (typeof data.height_cm === "number") setHeight(data.height_cm);
-      if (typeof data.weight_kg === "number") setWeight(data.weight_kg);
 
-      if (data.date_of_birth) {
-        const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(data.date_of_birth);
-        if (m) {
-          const d = new Date(+m[3], +m[2] - 1, +m[1]);
-          if (!Number.isNaN(d.getTime())) setDob(d);
+      startTransition(() => {
+        if (data.first_name) setFirstName(data.first_name);
+        if (data.last_name) setLastName(data.last_name);
+        if (typeof data.smokes === "boolean") setSmoke(data.smokes ? "yes" : "no");
+        if (typeof data.cigarettes_per_day === "number") setCigarettesPerDay(data.cigarettes_per_day);
+        if (typeof data.height_cm === "number") setHeight(data.height_cm);
+        if (typeof data.weight_kg === "number") setWeight(data.weight_kg);
+
+        if (data.date_of_birth) {
+          const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(data.date_of_birth);
+          if (m) {
+            const d = new Date(+m[3], +m[2] - 1, +m[1]);
+            if (!Number.isNaN(d.getTime())) setDob(d);
+          }
         }
-      }
 
-      if (Array.isArray(data.sports) && data.sports.length > 0) {
-        setSports(data.sports.map((name) => ({ name, level: "hobby" })));
-      }
-    });
-
-   
-    sessionStorage.removeItem("pax_form_prefill");
-  } catch (e) {
-    console.warn("Failed to apply prefill:", e);
-  }
-}, []);
+        if (Array.isArray(data.sports) && data.sports.length > 0) {
+          setSports(data.sports.map((name) => ({ name, level: "hobby" })));
+        }
+      });
 
 
- 
+      sessionStorage.removeItem("pax_form_prefill");
+    } catch (e) {
+      console.warn("Failed to apply prefill:", e);
+    }
+  }, []);
+
+
+
   const isFormComplete =
     firstName.trim().length > 0 &&
     lastName.trim().length > 0 &&
@@ -173,11 +171,11 @@ export default function OnlineFormPage() {
 
     const cleanedSports = sports
       .map((r) => r.name.trim())
-      .filter((name) => name.length > 0); 
+      .filter((name) => name.length > 0);
 
     const payload = {
       first_name: firstName.trim(),
-      last_name : lastName.trim(),
+      last_name: lastName.trim(),
       smokes: isSmoker,
       cigarettes_per_day: isSmoker && cigarettesPerDay !== "" ? Number(cigarettesPerDay) : null,
       height_cm: Number(height),
@@ -203,20 +201,20 @@ export default function OnlineFormPage() {
           "radial-gradient(80rem 80rem at 20% -10%, rgba(94,68,255,0.06), transparent 50%), radial-gradient(80rem 80rem at 120% 120%, rgba(36,186,111,0.08), transparent 40%)",
       }}
     >
-          <div style={{ position: "fixed", top: 16, left: 16, zIndex: 10 }}>
-          <Tooltip label="Back" withArrow>
-            <ActionIcon
-              component={Link}
-              href={`/${locale}`}
-              variant="subtle"
-              radius="xl"
-              size="lg"
-              aria-label="Back"
-            >
-              <IconChevronLeft size={18} />
-            </ActionIcon>
-          </Tooltip>
-        </div>
+      <div style={{ position: "fixed", top: 16, left: 16, zIndex: 10 }}>
+        <Tooltip label="Back" withArrow>
+          <ActionIcon
+            component={Link}
+            href={`/${locale}`}
+            variant="subtle"
+            radius="xl"
+            size="lg"
+            aria-label="Back"
+          >
+            <IconChevronLeft size={18} />
+          </ActionIcon>
+        </Tooltip>
+      </div>
       <Container size="sm">
         <Stack align="center" gap="lg">
           <Stack gap={4} align="center">

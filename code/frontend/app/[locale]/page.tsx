@@ -1,18 +1,18 @@
 "use client";
 
-import Image from "next/image";
 import {
   Button,
   Container,
-  Stack,
-  Title,
-  Text,
   Group,
-  Select,
   Paper,
+  Select,
+  Stack,
+  Text,
   ThemeIcon,
+  Title,
 } from "@mantine/core";
-import { IconShieldCheck, IconFileUpload, IconChecklist } from "@tabler/icons-react";
+import { IconChecklist, IconFileUpload, IconShieldCheck } from "@tabler/icons-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
@@ -25,6 +25,7 @@ export default function LocaleHomePage() {
   const [uploading, setUploading] = useState(false);
 
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const API_BASE = "http://localhost:8000";
 
   function openPicker() {
     if (!product || uploading) return;
@@ -40,13 +41,15 @@ export default function LocaleHomePage() {
       fd.append("file", file);
       fd.append("product", product);
 
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const res = await fetch(`${API_BASE}/process`, { method: "POST", body: fd });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         console.error("Upload failed:", err);
         alert(err?.error ?? "Upload failed");
         return;
       }
+
+      console.log(res);
 
       // Expected OCR payload (example):
       // {
