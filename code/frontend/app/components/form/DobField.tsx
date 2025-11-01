@@ -1,7 +1,7 @@
 "use client";
 
 import { DatePickerInput } from "@mantine/dates";
-import { yearsAgo } from "@/lib/form/date";
+import { yearsAgo } from "@/helpers/form/date";
 
 export default function DobField({
   dob, setDob, error, label, placeholder, onValidate,

@@ -1,7 +1,7 @@
 "use client";
 
 import { Group, NumberInput, Select } from "@mantine/core";
-import { Smoke } from "@/lib/form/types";
+import { Smoke } from "@/helpers/form/types";
 
 export default function SmokingFields({
   smoke, setSmoke,

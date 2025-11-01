@@ -2,7 +2,7 @@
 
 import { ActionIcon, Autocomplete, Button, Group, Select, Stack } from "@mantine/core";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
-import { Level, SportEntry } from "@/lib/form/types";
+import { Level, SportEntry } from "@/helpers/form/types";
 
 const DEFAULT_SUGGESTIONS = [
   "Basketball","Football","Running","Cycling","Swimming","Climbing",
