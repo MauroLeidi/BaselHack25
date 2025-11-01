@@ -71,5 +71,14 @@
       "close": "Chiudi",
       "retake": "Riscatta"
     }
+  },
+  "home": {
+    "title": "Domanda PAX",
+    "subtitle": "Scegli come desideri inviare le tue informazioni",
+    "select_product": "Seleziona prodotto",
+    "choose_product": "Scegli un prodotto",
+    "fill_form": "Compila il modulo online",
+    "upload": "Carica foto o PDF",
+    "reading": "Lettura del documento…"
   }
 }

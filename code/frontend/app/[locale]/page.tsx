@@ -14,16 +14,22 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 export default function LocaleHomePage() {
   const { locale } = useParams() as { locale: string };
   const router = useRouter();
+  const t = useTranslations("home");
 
   const [product, setProduct] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
   const fileRef = useRef<HTMLInputElement | null>(null);
   const API_BASE = "http://localhost:8000";
+
+  function changeLocale(next: string) {
+    router.push(`/${next}`);
+  }
 
   function openPicker() {
     if (!product || uploading) return;
@@ -48,11 +54,7 @@ export default function LocaleHomePage() {
       }
 
       const ocrData = await res.json();
-      console.log("OCR response:", ocrData);
-      sessionStorage.setItem(
-        "pax_form_prefill",
-        JSON.stringify(ocrData.data ?? ocrData)
-      );
+      sessionStorage.setItem("pax_form_prefill", JSON.stringify(ocrData.data ?? ocrData));
 
       const qs = `?product=${encodeURIComponent(product)}`;
       router.push(`/${locale}/form${qs}`);
@@ -81,48 +83,64 @@ export default function LocaleHomePage() {
           "radial-gradient(80rem 80rem at 20% -10%, rgba(94,68,255,0.06), transparent 50%), radial-gradient(80rem 80rem at 120% 120%, rgba(36,186,111,0.08), transparent 40%)",
       }}
     >
+      <div style={{ position: "absolute", top: 12, left: 16, zIndex: 20, width: 140 }}>
+        <Select
+          value={locale}
+          onChange={(v) => v && changeLocale(v)}
+          data={[
+            { value: "en", label: "English" },
+            { value: "de", label: "Deutsch" },
+            { value: "it", label: "Italiano" },
+            { value: "fr", label: "Français" },
+          ]}
+          size="xs"
+          radius="md"
+        />
+      </div>
+
       <Link
-      href={`/${locale}/admin`}
-      style={{
-        position: "absolute",
-        top: 12,
-        right: 32,
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 8,
-        textDecoration: "none",
+        href={`/${locale}/admin`}
+        style={{
+          position: "absolute",
+          top: 12,
+          right: 32,
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
+          textDecoration: "none",
         }}
         aria-label="PAX Admin"
       >
-      <Image
-        src="/pax_logo.svg"
-        alt="PAX"
-        width={46}
-        height={46}
-        style={{ display: "block" }}
-        priority
-      />
-      <Text size="lg" fw={700} c="pax" lh={1}>
-        Admin
-      </Text>
+        <Image src="/pax_logo.svg" alt="PAX" width={46} height={46} priority />
+        <Text size="lg" fw={700} c="pax" lh={1}>
+          Admin
+        </Text>
       </Link>
 
-      <Container size="sm">
-        <Stack align="center" gap="lg">
+      <Container
+        style={{ width: "100%", maxWidth: 560, display: "flex", justifyContent: "center" }}
+      >
+        <Stack align="center" gap="lg" style={{ width: "100%" }}>
           <Image src="/pax_logo.svg" alt="PAX" width={120} height={40} priority />
 
-          <Stack gap={4} align="center">
-            <Title order={2}>PAX Application</Title>
+          <Stack gap={4} align="center" style={{ width: "100%" }}>
+            <Title order={2}>{t("title")}</Title>
             <Text c="dimmed" ta="center">
-              Choose how you want to submit your information
+              {t("subtitle")}
             </Text>
           </Stack>
 
-          <Paper shadow="sm" radius="lg" p="lg" withBorder style={{ width: "100%", maxWidth: 560 }}>
+          <Paper
+            shadow="sm"
+            radius="lg"
+            p="lg"
+            withBorder
+            style={{ width: "100%", maxWidth: 560 }}
+          >
             <Stack gap="md">
               <Select
-                label="Select product"
-                placeholder="Choose a product"
+                label={t("select_product")}
+                placeholder={t("choose_product")}
                 value={product}
                 onChange={setProduct}
                 data={[
@@ -132,6 +150,9 @@ export default function LocaleHomePage() {
                 ]}
                 required
                 disabled={uploading}
+                styles={{
+                  label: { whiteSpace: "nowrap" },
+                }}
               />
 
               <Stack gap="sm">
@@ -146,12 +167,25 @@ export default function LocaleHomePage() {
                     radius="lg"
                     color="pax"
                     disabled={!product || uploading}
-                    leftSection={<IconChecklist size={18} />}
+                    leftSection={<IconChecklist size={18} style={{ display: "block" }} />}
+                    styles={{
+                      root: { height: 48 },
+                      inner: { justifyContent: "center", alignItems: "center", gap: 8 }, // center icon+text
+                      section: { display: "inline-flex", alignItems: "center" },         // center the icon span
+                      label: {
+                        display: "inline-flex",      // was inline-block -> causes vertical offset
+                        alignItems: "center",
+                        lineHeight: 1,               // avoid extra vertical space
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        maxWidth: "100%",
+                      },
+                    }}
                   >
-                    Fill in the online form
+                    {t("fill_form")}
                   </Button>
                 </Link>
-
                 <input
                   ref={fileRef}
                   type="file"
@@ -159,7 +193,6 @@ export default function LocaleHomePage() {
                   hidden
                   onChange={onNativeFileChange}
                 />
-
                 <Button
                   onClick={openPicker}
                   fullWidth
@@ -167,11 +200,25 @@ export default function LocaleHomePage() {
                   radius="lg"
                   variant="light"
                   color="paxGreen"
-                  leftSection={<IconFileUpload size={18} />}
+                  leftSection={<IconFileUpload size={18} style={{ display: "block" }} />}
                   loading={uploading}
                   disabled={!product || uploading}
+                  styles={{
+                    root: { height: 48 },
+                    inner: { justifyContent: "center", alignItems: "center", gap: 8 },
+                    section: { display: "inline-flex", alignItems: "center" },
+                    label: {
+                      display: "inline-flex",
+                      alignItems: "center",
+                      lineHeight: 1,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      maxWidth: "100%",
+                    },
+                  }}
                 >
-                  {uploading ? "Reading document…" : "Upload photo or PDF"}
+                  {uploading ? t("reading") : t("upload")}
                 </Button>
               </Stack>
             </Stack>

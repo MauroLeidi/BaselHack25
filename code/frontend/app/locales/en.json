@@ -71,5 +71,15 @@
       "close": "Close",
       "retake": "Retake"
     }
-  }
+  },
+  "home": {
+    "title": "PAX Application",
+    "subtitle": "Choose how you want to submit your information",
+    "select_product": "Select product",
+    "choose_product": "Choose a product",
+    "fill_form": "Fill in the online form",
+    "upload": "Upload photo or PDF",
+    "reading": "Reading document…"
+}
+
 }

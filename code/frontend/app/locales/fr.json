@@ -71,5 +71,14 @@
       "close": "Fermer",
       "retake": "Reprendre"
     }
+  },
+  "home": {
+    "title": "Demande PAX",
+    "subtitle": "Choisissez comment vous souhaitez envoyer vos informations",
+    "select_product": "Choisir un produit",
+    "choose_product": "Sélectionnez un produit",
+    "fill_form": "Remplir le formulaire en ligne",
+    "upload": "Télécharger une photo ou un PDF",
+    "reading": "Lecture du document…"
   }
 }

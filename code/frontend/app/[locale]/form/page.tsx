@@ -14,7 +14,7 @@ import {
   ActionIcon, Button, Container, Divider, Group, Paper, Stack, Text, Title, Tooltip,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconChevronLeft } from "@tabler/icons-react";
+import { IconChevronLeft, IconFileUpload } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -33,6 +33,7 @@ export default function OnlineFormPage() {
   const [dob, setDob] = useState<Date | null>(null);
   const [sports, setSports] = useState<SportEntry[]>([{ name: "", level: "hobby" }]);
   const [errors, setErrors] = useState<Errors>({});
+  const [submitting, setSubmitting] = useState(false);
   const shownNotiIdsRef = useRef<Set<string>>(new Set());
 
   const isSmoker = smoke === "yes";
@@ -132,6 +133,7 @@ export default function OnlineFormPage() {
   }
 
   async function handleSubmit() {
+    if (submitting) return;
     if (!isFormComplete || !validateAll()) {
       notifications.show({
         title: t("errors.title") ?? "Validation error",
@@ -154,6 +156,7 @@ export default function OnlineFormPage() {
     };
 
     try {
+      setSubmitting(true);
       const res = await fetch("http://localhost:8000/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -173,6 +176,9 @@ export default function OnlineFormPage() {
       window.location.assign(`/${locale}/result`);
     } catch (e: any) {
       notifications.show({ title: "Network error", message: e?.message ?? "Failed to reach server", color: "red", autoClose: 6000 });
+    }
+    finally {
+      setSubmitting(false);
     }
   }
 
@@ -194,7 +200,15 @@ export default function OnlineFormPage() {
         </Tooltip>
       </div>
 
-      <Container size="sm">
+      <Container
+        size="false"
+        style={{
+          width: "100%",
+          maxWidth: 640, // enforce same width everywhere
+          display: "flex",
+          justifyContent: "center",
+        }}
+          >
         <Stack align="center" gap="lg">
           <Stack gap={4} align="center">
             <Title order={2}>{t("title")}</Title>
@@ -202,7 +216,18 @@ export default function OnlineFormPage() {
             <LanguageSwitcher />
           </Stack>
 
-          <Paper shadow="sm" radius="lg" p="lg" withBorder style={{ width: "100%", maxWidth: 640 }}>
+          <Paper
+            shadow="sm"
+            radius="lg"
+            p="lg"
+            withBorder
+            style={{
+              width: "100%",
+              maxWidth: 640,
+              minWidth: 640, // lock width to avoid language text pushing form
+            }}
+          >
+
             <Stack gap="md">
               <NameFields
                 firstName={firstName} lastName={lastName}
@@ -255,6 +280,8 @@ export default function OnlineFormPage() {
                   size="md"
                   radius="md"
                   onClick={handleSubmit}
+                  leftSection={<IconFileUpload size={18} />}
+                  loading={submitting}
                   disabled={
                     !(
                       firstName.trim() &&
@@ -264,10 +291,10 @@ export default function OnlineFormPage() {
                       weight !== "" &&
                       dob !== null &&
                       (!isSmoker || cigarettesPerDay !== "")
-                    ) || Object.keys(errors).length > 0
+                    ) || Object.keys(errors).length > 0 || submitting
                   }
                 >
-                  {t("submit")}
+                  {submitting ? t("reading") ?? "Sending…" : t("submit")}
                 </Button>
               </Group>
             </Stack>

@@ -1,7 +1,7 @@
 {
   "form": {
     "title": "Gesundheitsfragebogen",
-    "subtitle": "Bitte beantworten Sie die Fragen wahrheitsgemäß. Pflichtfelder müssen ausgefüllt werden.",
+    "subtitle": "Bitte beantworten Sie alle Fragen ehrlich. Pflichtfelder sind erforderlich.",
     "firstName": "Vorname",
     "lastName": "Nachname",
     "smoke": "Rauchen Sie?",
@@ -71,5 +71,14 @@
       "close": "Schließen",
       "retake": "Erneut aufnehmen"
     }
+  },
+  "home": {
+    "title": "PAX Antrag",
+    "subtitle": "Wählen Sie, wie Sie Ihre Informationen übermitteln möchten",
+    "select_product": "Produkt wählen",
+    "choose_product": "Produkt auswählen",
+    "fill_form": "Online-Formular ausfüllen",
+    "upload": "Foto oder PDF hochladen",
+    "reading": "Dokument wird gelesen…"
   }
 }

@@ -10,7 +10,8 @@ type Props = {
   setFile: (f: File | null) => void;
   sending: boolean;
   onPreview: () => void;
-  onUpdateRequest: () => void; 
+  onUpdateRequest: () => void;
+  previewing?: boolean; 
 };
 
 const PRODUCT_OPTIONS = [
@@ -20,7 +21,7 @@ const PRODUCT_OPTIONS = [
 ] as const;
 
 export default function RulesFormCard({
-  product, setProduct, file, setFile, sending, onPreview, onUpdateRequest,
+  product, setProduct, file, setFile, sending, onPreview, onUpdateRequest, previewing = false,
 }: Props) {
   const fileInfo = useMemo(() => {
     if (!file) return null;
@@ -29,8 +30,13 @@ export default function RulesFormCard({
   }, [file]);
 
   return (
-    <Paper radius="lg" p="lg" shadow="sm" withBorder={false}
-      style={{ background: "var(--mantine-color-body)", boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06)" }}>
+    <Paper
+      radius="lg"
+      p="lg"
+      shadow="sm"
+      withBorder={false}
+      style={{ background: "var(--mantine-color-body)", boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06)" }}
+    >
       <Stack gap="md">
         <Text size="sm" c="dimmed">Product</Text>
 
@@ -61,16 +67,26 @@ export default function RulesFormCard({
         />
 
         {file && (
-          <Text size="sm" c="dimmed">
-            Selected: {fileInfo}
-          </Text>
+          <Text size="sm" c="dimmed">Selected: {fileInfo}</Text>
         )}
 
         <Group justify="center" mt="md" gap="sm">
-          <Button variant="light" size="md" disabled={!file || sending} onClick={onPreview}>
+          <Button
+            variant="light"
+            size="md"
+            disabled={!file || !product || sending || previewing}
+            loading={previewing}
+            onClick={onPreview}
+          >
             Preview
           </Button>
-          <Button variant="filled" size="md" disabled={!product || !file || sending} loading={sending} onClick={onUpdateRequest}>
+          <Button
+            variant="filled"
+            size="md"
+            disabled={!product || !file || sending}
+            loading={sending}
+            onClick={onUpdateRequest}
+          >
             Update
           </Button>
         </Group>
