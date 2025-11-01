@@ -1,0 +1,20 @@
+name: baselhack25
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - pandas
+  - numpy
+  - matplotlib
+  - tqdm
+  - fastapi
+  - uvicorn
+  - requests
+  - openai
+  - pydantic
+  - python-dotenv
+  - python-multipart
+  - pip
+  - pip:
+      # In case you still need pip-only packages, list them here
