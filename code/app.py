@@ -7,7 +7,8 @@ from typing import List, Optional
 import json
 from dotenv import load_dotenv
 from datetime import datetime
-from fastapi.middleware.cors import CORSMiddleware # ⬅️ 1. Importa il Middleware
+from fastapi.middleware.cors import CORSMiddleware # 1. Import Middleware
+from decide import predict_decision,replace_rule_table
 
 load_dotenv()
 
@@ -35,6 +36,20 @@ class FormData(BaseModel):
     weight_kg: Optional[float] = Field(None, description="Weight in kilograms")
     date_of_birth: Optional[str] = Field(None, description="The birth year of the person in format DD.MM.YYYY")
     sports: Optional[List[str]] = Field(None, description="List of sports the person practices")
+
+# -------------------------------------------------------------------------------
+# Pydantic model for rules, useful when rules updates are made from the frontend
+# -------------------------------------------------------------------------------
+class RuleItem(BaseModel):
+    BMI: float
+    AGE: int
+    SMOKER: bool
+    PRACTICE_SPORT: bool
+    DECISION: str
+    COMMENT: str
+    
+class RuleUpdate(BaseModel):
+    rules: list[RuleItem]
 
 def extract_form_fields_from_image(image_bytes: bytes) -> FormData:
     """
@@ -128,21 +143,26 @@ async def process_form(
     
 @app.post("/predict")
 async def predict(form_data: FormData):
-    # Esempio di elaborazione:
-    message = f"Dati ricevuti con successo. Stato fumo: {'Sì' if form_data.smokes else 'No'}."
-    
-   # TODO MAURO
+    decision, comment = predict_decision(form_data.dict())
     return JSONResponse(content={
         "status": "success",
-        "message": message,
-        "received_data": form_data.model_dump()
+        "decision": decision,
+        "reason": comment
     })
-
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy"}
+
+@app.post("/admin/update_rules")
+def update_rules(update: RuleUpdate):
+    try:
+        # Convert list of RuleItem into a DataFrame
+        nlines = replace_rule_table(update.rules)
+        return {"status": "success", "message": f"Rule table updated. {nlines} rules now active."}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to update rules: {str(e)}")
 
 # Run with: uvicorn main:app --reload
 if __name__ == "__main__":
