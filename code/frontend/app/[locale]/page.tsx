@@ -81,7 +81,6 @@ export default function LocaleHomePage() {
           "radial-gradient(80rem 80rem at 20% -10%, rgba(94,68,255,0.06), transparent 50%), radial-gradient(80rem 80rem at 120% 120%, rgba(36,186,111,0.08), transparent 40%)",
       }}
     >
-      {/* Top-right Admin link with logo + text */}
       <Link
       href={`/${locale}/admin`}
       style={{
@@ -95,7 +94,6 @@ export default function LocaleHomePage() {
         }}
         aria-label="PAX Admin"
       >
-      {/* keep SVG small and block so it centers cleanly */}
       <Image
         src="/pax_logo.svg"
         alt="PAX"
