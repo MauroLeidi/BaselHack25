@@ -4,77 +4,86 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
+import { notifications } from "@mantine/notifications";
 import {
   ActionIcon,
-  Button,
   Container,
-  Divider,
   Group,
-  Paper,
-  Select,
   Stack,
   Text,
   Title,
   Tooltip,
 } from "@mantine/core";
-import { IconChevronLeft, IconSend, IconSettings2 } from "@tabler/icons-react";
-
-const PRODUCT_LABELS: Record<string, string> = {
-  "pillar-3a": "Pillar 3a",
-  "child-insurance": "Child insurance",
-  "accident-insurance": "Accident insurance",
-};
-
-const PRODUCT_OPTIONS = [
-  { value: "pillar-3a", label: "Pillar 3a" },
-  { value: "child-insurance", label: "Child insurance" },
-  { value: "accident-insurance", label: "Accident insurance" },
-];
-
-const ACCEPT =
-  ".doc,.docx,.xls,.xlsx,.csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv";
+import { IconChevronLeft } from "@tabler/icons-react";
+import ConfirmModal from "@/app/components/admin/ConfirmModal";
+import RulesFormCard from "@/app/components/admin/RulesFormCard";
 
 export default function AdminPage() {
   const { locale } = useParams() as { locale: string };
-
   const [product, setProduct] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
-
   const inputRef = useRef<HTMLInputElement>(null);
-  const selectedLabel = product ? PRODUCT_LABELS[product] ?? product : null;
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
-  function pickFile() {
-    inputRef.current?.click();
-  }
+  async function handleSendConfirmed() {
+    if (!product) {
+      notifications.show({ title: "Missing product", message: "Select a product.", color: "orange" });
+      return;
+    }
+    if (!file) {
+      notifications.show({ title: "Missing file", message: "Choose a file.", color: "orange" });
+      return;
+    }
+    if (sending) return;
 
-  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0] ?? null;
-    setFile(f);
-  }
-
-  async function handleSend() {
-    if (!product || sending) return;
+    setConfirmOpen(false);
 
     try {
       setSending(true);
+      const text = await file.text();
+      const parsed = JSON.parse(text);
 
-      const form = new FormData();
-      form.append("product", product);
-      if (file) form.append("file", file, file.name);
+      const res = await fetch("http://localhost:8000/admin/update_rules", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(parsed),
+      });
 
-      // TODO: replace with real API endpoint
-      // const res = await fetch("/api/admin/send", { method: "POST", body: form });
-      // if (!res.ok) throw new Error("Send failed");
-      await new Promise((r) => setTimeout(r, 800)); // placeholder
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail ?? "Upload failed");
+      }
 
-      console.log("Sent:", { product, file: file?.name });
-      alert(`Sent for: ${selectedLabel}${file ? `\nFile: ${file.name}` : ""}`);
-      if (inputRef.current) inputRef.current.value = "";
+      const result = await res.json();
+
+      notifications.show({
+        title: "Rules updated",
+        message: result.message ?? "Success",
+        color: "green",
+        autoClose: 5000,
+      });
+
       setFile(null);
+      if (inputRef.current) inputRef.current.value = "";
+    } catch (err: any) {
+      notifications.show({
+        title: "Error",
+        message: err.message,
+        color: "red",
+        autoClose: 7000,
+      });
     } finally {
       setSending(false);
     }
+  }
+
+  function handlePreview() {
+    if (!file) {
+      notifications.show({ title: "Missing file", message: "Choose a file.", color: "orange" });
+      return;
+    }
+    console.log("Preview TODO");
   }
 
   return (
@@ -93,7 +102,8 @@ export default function AdminPage() {
           top: 0,
           zIndex: 20,
           borderBottom: "1px solid var(--mantine-color-default-border)",
-          background: "color-mix(in srgb, var(--mantine-color-body) 82%, transparent)",
+          background:
+            "color-mix(in srgb, var(--mantine-color-body) 82%, transparent)",
           backdropFilter: "saturate(160%) blur(6px)",
         }}
       >
@@ -114,7 +124,7 @@ export default function AdminPage() {
               </Tooltip>
 
               <Image
-                src="/pax_logo.jpeg"
+                src="/pax_logo.svg"
                 alt="PAX"
                 width={90}
                 height={28}
@@ -134,101 +144,36 @@ export default function AdminPage() {
               Admin Console
             </Title>
             <Text c="dimmed" mt={4}>
-              Configure products and send
+              Upload rules & preview
             </Text>
           </div>
 
-          <Paper
-            radius="lg"
-            p="lg"
-            shadow="sm"
-            withBorder={false}
-            style={{
-              width: "100%",
-              background: "var(--mantine-color-body)",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06)",
+          <RulesFormCard
+            product={product}
+            setProduct={setProduct}
+            file={file}
+            setFile={setFile}
+            sending={sending}
+            onPreview={handlePreview}              
+            onUpdateRequest={() => {
+              if (!product || !file) {
+                notifications.show({ title: "Missing data", message: "Select a product and choose a file.", color: "orange" });
+                return;
+              }
+              setConfirmOpen(true);
             }}
-          >
-            <Stack gap="md">
-              <div>
-                <Text size="sm" c="dimmed">
-                  Product
-                </Text>
-                {selectedLabel ? (
-                  <Title order={4} mt={2} style={{ fontWeight: 600 }}>
-                    {selectedLabel}
-                  </Title>
-                ) : (
-                  <Text mt={2} c="dimmed" style={{ fontStyle: "italic" }}>
-                    Select target
-                  </Text>
-                )}
-              </div>
-
-              <Select
-                data={PRODUCT_OPTIONS}
-                value={product}
-                onChange={setProduct}
-                placeholder="Choose a product"
-                size="md"
-                radius="md"
-                variant="filled"
-                aria-label="Choose a product"
-                styles={{ input: { background: "var(--mantine-color-default)" } }}
-              />
-
-              <Divider
-                my="xs"
-                style={{
-                  opacity: 0.6,
-                  borderColor: "var(--mantine-color-default-border)",
-                }}
-              />
-
-              <input
-                ref={inputRef}
-                type="file"
-                accept={ACCEPT}
-                onChange={onFileChange}
-                style={{ display: "none" }}
-              />
-
-              <Group gap="sm" align="stretch" grow>
-                <Button
-                  variant="default"
-                  leftSection={<IconSettings2 size={16} />}
-                  onClick={pickFile}
-                  size="md"
-                  fullWidth
-                  aria-label="Choose rule file"
-                >
-                  Choose file
-                </Button>
-
-                <Button
-                  variant="filled"
-                  color="paxGreen"
-                  leftSection={<IconSend size={16} />}
-                  size="md"
-                  disabled={!product}
-                  loading={sending}
-                  onClick={handleSend}
-                  fullWidth
-                  aria-label="Send"
-                >
-                  Send
-                </Button>
-              </Group>
-
-              {file ? (
-                <Text size="sm" c="dimmed">
-                  Selected: {file.name} · {(file.size / 1024).toFixed(0)} KB
-                </Text>
-              ) : null}
-            </Stack>
-          </Paper>
+          />
         </Stack>
       </Container>
+
+      <ConfirmModal
+        opened={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        product={product}
+        fileName={file?.name}
+        loading={sending}
+        onConfirm={handleSendConfirmed}          
+      />
     </div>
   );
 }

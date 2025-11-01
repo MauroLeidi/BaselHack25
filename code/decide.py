@@ -9,12 +9,12 @@ LEARN_FLAG = True  # Global learning flag
 columns = ['BMI', 'AGE', 'SMOKER', 'PRACTICE_SPORT', 'DECISION', 'COMMENT']
 
 rules_data = [
-    [22, 25, False, True,  "accepted", "Nothing special"],
-    [30, 45, True,  False, "accepted with extra charge", "Higher risk: middle-aged smoker, inactive"],
-    [27, 35, False, False, "need for additional information", "Missing health activity data"],
-    [35, 55, True,  False, "rejected", "Too high risk: older smoker with high BMI"],
-    [19, 20, False, True,  "accepted", "Young and active, low risk"],
-    [25, 40, True,  True,  "accepted with extra charge", "Smoker but compensates with sport activity"]
+    [22.0, 25, False, True,  "accepted", "Nothing special"],
+    [30.0, 45, True,  False, "accepted with extra charge", "Higher risk: middle-aged smoker, inactive"],
+    [27.0, 35, False, False, "need for additional information", "Missing health activity data"],
+    [35.0, 55, True,  False, "rejected", "Too high risk: older smoker with high BMI"],
+    [19.0, 20, False, True,  "accepted", "Young and active, low risk"],
+    [25.0, 40, True,  True,  "accepted with extra charge", "Smoker but compensates with sport activity"]
 ]
 
 rules_df = pd.DataFrame(rules_data, columns=columns)

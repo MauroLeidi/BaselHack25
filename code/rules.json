@@ -1,0 +1,340 @@
+{
+  "rules": [
+    {
+      "BMI": 22.5,
+      "AGE": 30,
+      "SMOKER": false,
+      "PRACTICE_SPORT": true,
+      "DECISION": "APPROVED",
+      "COMMENT": "Healthy BMI, active lifestyle, non-smoker."
+    },
+    {
+      "BMI": 31.2,
+      "AGE": 45,
+      "SMOKER": true,
+      "PRACTICE_SPORT": false,
+      "DECISION": "REVIEW",
+      "COMMENT": "High BMI and smoking behavior. Manual review required."
+    },
+    {
+      "BMI": 18.9,
+      "AGE": 19,
+      "SMOKER": false,
+      "PRACTICE_SPORT": true,
+      "DECISION": "APPROVED",
+      "COMMENT": "Young, athletic, no risk factors."
+    },
+    {
+      "BMI": 27.8,
+      "AGE": 52,
+      "SMOKER": false,
+      "PRACTICE_SPORT": false,
+      "DECISION": "REVIEW",
+      "COMMENT": "Borderline BMI, sedentary lifestyle. Needs doctor's note."
+    },
+    {
+      "BMI": 35.4,
+      "AGE": 60,
+      "SMOKER": true,
+      "PRACTICE_SPORT": false,
+      "DECISION": "REJECTED",
+      "COMMENT": "Severe obesity and long-term smoker. High medical risk."
+    },
+    {
+      "BMI": 24.1,
+      "AGE": 28,
+      "SMOKER": false,
+      "PRACTICE_SPORT": true,
+      "DECISION": "APPROVED",
+      "COMMENT": "Normal BMI and regular sports practice."
+    },
+    {
+      "BMI": 26.7,
+      "AGE": 34,
+      "SMOKER": false,
+      "PRACTICE_SPORT": true,
+      "DECISION": "APPROVED",
+      "COMMENT": "Mildly elevated BMI but compensated by activity."
+    },
+    {
+      "BMI": 29.9,
+      "AGE": 41,
+      "SMOKER": false,
+      "PRACTICE_SPORT": false,
+      "DECISION": "REVIEW",
+      "COMMENT": "Near-obese BMI; recommend lifestyle counseling."
+    },
+    {
+      "BMI": 17.6,
+      "AGE": 22,
+      "SMOKER": false,
+      "PRACTICE_SPORT": true,
+      "DECISION": "REVIEW",
+      "COMMENT": "Underweight; verify nutritional status."
+    },
+    {
+      "BMI": 33.3,
+      "AGE": 55,
+      "SMOKER": true,
+      "PRACTICE_SPORT": true,
+      "DECISION": "REVIEW",
+      "COMMENT": "Obese but active; require additional screening."
+    },
+    {
+      "BMI": 21.0,
+      "AGE": 26,
+      "SMOKER": false,
+      "PRACTICE_SPORT": false,
+      "DECISION": "APPROVED",
+      "COMMENT": "Normal BMI, no smoking, no sports."
+    },
+    {
+      "BMI": 23.5,
+      "AGE": 37,
+      "SMOKER": true,
+      "PRACTICE_SPORT": true,
+      "DECISION": "REVIEW",
+      "COMMENT": "Smoker despite good BMI and activity."
+    },
+    {
+      "BMI": 27.1,
+      "AGE": 48,
+      "SMOKER": true,
+      "PRACTICE_SPORT": false,
+      "DECISION": "REVIEW",
+      "COMMENT": "Overweight smoker; check cardiovascular risk."
+    },
+    {
+      "BMI": 39.0,
+      "AGE": 63,
+      "SMOKER": false,
+      "PRACTICE_SPORT": false,
+      "DECISION": "REJECTED",
+      "COMMENT": "Class II–III obesity; unacceptable risk."
+    },
+    {
+      "BMI": 25.0,
+      "AGE": 32,
+      "SMOKER": false,
+      "PRACTICE_SPORT": true,
+      "DECISION": "APPROVED",
+      "COMMENT": "At the threshold BMI; active and non-smoker."
+    },
+    {
+      "BMI": 28.4,
+      "AGE": 44,
+      "SMOKER": false,
+      "PRACTICE_SPORT": true,
+      "DECISION": "REVIEW",
+      "COMMENT": "Overweight but engaged in regular sports."
+    },
+    {
+      "BMI": 30.1,
+      "AGE": 39,
+      "SMOKER": true,
+      "PRACTICE_SPORT": true,
+      "DECISION": "REVIEW",
+      "COMMENT": "Obesity with smoking; require cessation plan."
+    },
+    {
+      "BMI": 19.8,
+      "AGE": 21,
+      "SMOKER": false,
+      "PRACTICE_SPORT": false,
+      "DECISION": "APPROVED",
+      "COMMENT": "Healthy BMI and no smoking."
+    },
+    {
+      "BMI": 34.7,
+      "AGE": 58,
+      "SMOKER": true,
+      "PRACTICE_SPORT": false,
+      "DECISION": "REJECTED",
+      "COMMENT": "Obesity plus smoking and sedentary lifestyle."
+    },
+    {
+      "BMI": 23.8,
+      "AGE": 47,
+      "SMOKER": false,
+      "PRACTICE_SPORT": true,
+      "DECISION": "APPROVED",
+      "COMMENT": "Stable BMI and consistent exercise."
+    },
+    {
+      "BMI": 27.0,
+      "AGE": 50,
+      "SMOKER": false,
+      "PRACTICE_SPORT": false,
+      "DECISION": "REVIEW",
+      "COMMENT": "Overweight, sedentary; recommend check-up."
+    },
+    {
+      "BMI": 32.6,
+      "AGE": 46,
+      "SMOKER": false,
+      "PRACTICE_SPORT": true,
+      "DECISION": "REVIEW",
+      "COMMENT": "Obese but active; request lab results."
+    },
+    {
+      "BMI": 20.7,
+      "AGE": 24,
+      "SMOKER": true,
+      "PRACTICE_SPORT": false,
+      "DECISION": "REVIEW",
+      "COMMENT": "Young smoker; encourage cessation."
+    },
+    {
+      "BMI": 36.2,
+      "AGE": 61,
+      "SMOKER": false,
+      "PRACTICE_SPORT": true,
+      "DECISION": "REVIEW",
+      "COMMENT": "Severe obesity with activity; needs physician clearance."
+    },
+    {
+      "BMI": 24.9,
+      "AGE": 29,
+      "SMOKER": false,
+      "PRACTICE_SPORT": false,
+      "DECISION": "APPROVED",
+      "COMMENT": "Upper-normal BMI, otherwise low risk."
+    },
+    {
+      "BMI": 16.9,
+      "AGE": 20,
+      "SMOKER": false,
+      "PRACTICE_SPORT": true,
+      "DECISION": "REVIEW",
+      "COMMENT": "Underweight athlete; check for deficiencies."
+    },
+    {
+      "BMI": 28.8,
+      "AGE": 54,
+      "SMOKER": true,
+      "PRACTICE_SPORT": false,
+      "DECISION": "REJECTED",
+      "COMMENT": "Multiple risk factors: age, weight, smoking."
+    },
+    {
+      "BMI": 21.9,
+      "AGE": 36,
+      "SMOKER": false,
+      "PRACTICE_SPORT": true,
+      "DECISION": "APPROVED",
+      "COMMENT": "Non-smoker with healthy metrics."
+    },
+    {
+      "BMI": 33.9,
+      "AGE": 42,
+      "SMOKER": false,
+      "PRACTICE_SPORT": false,
+      "DECISION": "REVIEW",
+      "COMMENT": "Obese but non-smoker; require lifestyle plan."
+    },
+    {
+      "BMI": 26.2,
+      "AGE": 38,
+      "SMOKER": true,
+      "PRACTICE_SPORT": true,
+      "DECISION": "REVIEW",
+      "COMMENT": "Overweight smoker; verify blood pressure."
+    },
+    {
+      "BMI": 23.0,
+      "AGE": 27,
+      "SMOKER": false,
+      "PRACTICE_SPORT": true,
+      "DECISION": "APPROVED",
+      "COMMENT": "Meets preferred criteria."
+    },
+    {
+      "BMI": 29.1,
+      "AGE": 57,
+      "SMOKER": false,
+      "PRACTICE_SPORT": false,
+      "DECISION": "REVIEW",
+      "COMMENT": "Near-obese and older; schedule screening."
+    },
+    {
+      "BMI": 37.5,
+      "AGE": 65,
+      "SMOKER": true,
+      "PRACTICE_SPORT": false,
+      "DECISION": "REJECTED",
+      "COMMENT": "Very high risk profile."
+    },
+    {
+      "BMI": 24.3,
+      "AGE": 33,
+      "SMOKER": true,
+      "PRACTICE_SPORT": true,
+      "DECISION": "REVIEW",
+      "COMMENT": "Smoker; contingent on cessation program."
+    },
+    {
+      "BMI": 27.6,
+      "AGE": 40,
+      "SMOKER": false,
+      "PRACTICE_SPORT": true,
+      "DECISION": "APPROVED",
+      "COMMENT": "Slightly elevated BMI mitigated by activity."
+    },
+    {
+      "BMI": 30.9,
+      "AGE": 49,
+      "SMOKER": false,
+      "PRACTICE_SPORT": false,
+      "DECISION": "REVIEW",
+      "COMMENT": "Obese, sedentary; require physician evaluation."
+    },
+    {
+      "BMI": 22.0,
+      "AGE": 25,
+      "SMOKER": false,
+      "PRACTICE_SPORT": false,
+      "DECISION": "APPROVED",
+      "COMMENT": "Low-risk profile."
+    },
+    {
+      "BMI": 34.2,
+      "AGE": 59,
+      "SMOKER": true,
+      "PRACTICE_SPORT": true,
+      "DECISION": "REJECTED",
+      "COMMENT": "Obesity combined with smoking; unacceptable risk."
+    },
+    {
+      "BMI": 20.1,
+      "AGE": 23,
+      "SMOKER": false,
+      "PRACTICE_SPORT": true,
+      "DECISION": "APPROVED",
+      "COMMENT": "Healthy and active."
+    },
+    {
+      "BMI": 26.9,
+      "AGE": 35,
+      "SMOKER": true,
+      "PRACTICE_SPORT": false,
+      "DECISION": "REVIEW",
+      "COMMENT": "Overweight smoker; needs cessation counseling."
+    },
+    {
+      "BMI": 32.0,
+      "AGE": 43,
+      "SMOKER": false,
+      "PRACTICE_SPORT": true,
+      "DECISION": "REVIEW",
+      "COMMENT": "Obese but active; conditional approval possible."
+    },
+    {
+      "BMI": 18.5,
+      "AGE": 18,
+      "SMOKER": false,
+      "PRACTICE_SPORT": true,
+      "DECISION": "APPROVED",
+      "COMMENT": "Lower-normal BMI; no risk factors."
+    }
+  ]
+}
