@@ -201,7 +201,7 @@ export default function ResultPage() {
                         Insurance Price
                       </Text>
                       <Text fw={900} c="paxGreen" style={{ fontSize: 28 }}>
-                        {fmtCHF(po!.predicted_price)}
+                        {fmtCHF(po!.base_price)}
                       </Text>
                     </Stack>
                   </Paper>
