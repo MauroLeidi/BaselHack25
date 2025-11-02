@@ -49,12 +49,32 @@ code/backend/
 - **`schemas.py`**: Defines Pydantic models for API request/response validation including `FormData`, `PredictionOutput`, and `RuleUpdate`.
 
 ### Frontend (Next.js)
-
 ```
 code/frontend/
+├── .next/                     # Next.js build output (auto-generated)
+├── app/                       # App Router structure
+│   ├── [locale]/              # Dynamic route for multilingual support
+│   │   ├── admin/             # Admin dashboard pages
+│   │   │   └── page.tsx
+│   │   ├── form/              # User input form (health, insurance, etc.)
+│   │   │   └── page.tsx
+│   │   ├── result/            # Result/summary after form submission
+│   │   │   └── page.tsx
+│   │   ├── layout.tsx         # Shared layout per locale
+│   │   └── page.tsx           # Root localized landing page
+│   ├── components/            # components
+│   │   ├── admin/             # Admin-specific components
+│   │   ├── form/              # Form-related fields & inputs
+│   ├── locales/               # Translation files (Next-Intl)
+│   │   ├── de.json
+│   │   ├── en.json
+│   │   ├── fr.json
+│   │   └── it.json
+│   ├── page.tsx               # Root homepage
+│   └── providers.tsx          # Context providers (Mantine, Intl, etc.)
 ```
 
-The Frontend is coded in ReactJs and Mantine
+The Frontend is coded in ReactJs with Mantine and Tabler Iconography.
 
 ### ML Models & Notebooks
 
