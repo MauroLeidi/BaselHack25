@@ -30,7 +30,7 @@ function toAbsoluteUrl(pathOrUrl: string) {
 
 const MOCK_PLOTS =
   (process.env.NEXT_PUBLIC_PREVIEW_MOCKS?.split(",").map((s) => s.trim()).filter(Boolean)) ??
-  ["/plots/preview_sample.jpeg"]; 
+  ["/plots/rules_changes_overview.png"]; 
 
 export default function AdminPage() {
   const { locale } = useParams() as { locale: string };
