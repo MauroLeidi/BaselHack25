@@ -1,3 +1,23 @@
+"""
+helpers.py
+
+This module provides essential utilities for the data pipeline: 
+**generating synthetic data** for model training/testing and **extracting real-world 
+data** from image uploads using Computer Vision/LLM capabilities.
+
+Key Functions:
+1. `sample_population`: Creates a statistically realistic, synthetic population 
+   sample based on Swiss demographic data, including age, sex, and health metrics
+   (BMI, Smoker status, Sport activity). This is crucial for training and testing 
+   risk models.
+2. `get_insurance_data`: Transforms raw input (often from a form) into the
+   standardized feature dictionary required by the downstream prediction models.
+3. `extract_form_fields_from_image`: Uses the OpenAI Vision API (GPT-4o) and 
+   Pydantic schemas to parse and extract structured data fields (like height, 
+   weight, and DOB) directly from an uploaded image file, enabling an OCR-like 
+   workflow.
+"""
+
 import numpy as np
 import pandas as pd
 import numpy as np
