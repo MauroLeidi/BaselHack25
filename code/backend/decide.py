@@ -1,3 +1,25 @@
+"""
+decide.py - Rules Engine for Insurance Decisions
+
+This module implements a core component of an insurance underwriting system,
+combining a **deterministic, hard-coded operational rule set** (Operational Rules, which resembles the brain of the underwriter)
+with an **adaptive, similarity-based rule table** (Learned Rules).
+
+The engine's primary function is to determine an insurance decision (e.g., 'accepted',
+'rejected', 'accepted with extra charge') and provides a justification (comment).
+
+Key Components:
+1. Operational Rules (`operational_rule`): A set of rigid, pre-defined business
+   rules.
+2. Learned Rules (`rules_df`): A pandas DataFrame loaded from a CSV that stores
+   past decisions and serves as a historical decision-making reference.
+3. Decision Logic (`decide_and_learn`): Compares the input to the Learned Rules
+   using a custom similarity metric. If the global `LEARN_FLAG` is True, this
+   function ensures the Operational Decision overrides the Learned Decision upon a
+   perfect match, thereby **correcting** the learned rule, or **adding** a new
+   rule if no match is found. This enables continuous learning.
+"""
+
 import pandas as pd
 import numpy as np
 
@@ -5,7 +27,7 @@ LEARN_FLAG = True  # Global learning flag
 
 columns = ['BMI', 'AGE', 'SMOKER', 'PRACTICE_SPORT', 'DECISION', 'COMMENT']
 
-rules_df = pd.read_csv("../assets/learned_rules.csv")
+rules_df = pd.read_csv("../../assets/learned_rules.csv")
 
 # --------------------------------------------------
 # 1. Operational Analytical Rule

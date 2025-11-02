@@ -1,3 +1,21 @@
+"""
+price_predictor.py - Insurance Premium Prediction Service
+
+This module defines the `InsuranceModel` class responsible for managing and 
+serving the machine learning model used for insurance premium prediction and 
+adjustment calculation.
+
+The model calculates a predicted price based on customer features (Age, BMI, 
+Smoker status, Sport practice) and determines the percentage and euro adjustment 
+relative to a provided base price.
+
+Key Components:
+- `InsuranceModel`: Handles loading the Random Forest model and a base price 
+  constant using `joblib`.
+- `calculate_price_adjustment`: The core method for predicting the final premium 
+  and computing the adjustment metrics.
+"""
+
 from schemas import PredictionOutput
 from typing import Optional
 import numpy as np
@@ -17,8 +35,8 @@ class InsuranceModel:
     def load_model(self) -> bool:
         """Loads the model and base price"""
         try:
-            self.rf_model = joblib.load(f"../assets/{self.model_path}")
-            self.base_price = joblib.load(f"../assets/{self.base_price_path}")
+            self.rf_model = joblib.load(f"../../assets/{self.model_path}")
+            self.base_price = joblib.load(f"../../assets/{self.base_price_path}")
             print("✅ Model loaded successfully")
             return True
         except Exception as e:

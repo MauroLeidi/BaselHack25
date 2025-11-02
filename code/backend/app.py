@@ -1,7 +1,28 @@
+"""
+main.py - Core FastAPI
+
+This module defines the primary API endpoints for the insurance application. 
+It orchestrates the various components, including:
+1. **Data Extraction:** Processing form data from uploaded images (using a helper agent).
+2. **Decision Making:** Determining the underwriting decision (Accept/Reject) using 
+   the adaptive rules engine (`decide`).
+3. **Price Prediction:** Calculating the insurance premium adjustment using a 
+   pre-trained machine learning model (`price_predictor`).
+4. **Explanation:** Generating detailed, natural-language reasoning for the decision 
+   via a reasoning agent (SHAP + GPT).
+
+The service is initialized with a `lifespan` manager to ensure the ML model is 
+loaded before the server starts.
+
+Endpoints:
+- `/process`: Handles image upload and data extraction.
+- `/predict`: Accepts standardized form data and returns the decision, price 
+  adjustment, and explanation.
+- `/admin/update_rules`: Administrative endpoint for rule table management.
+"""
+
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import JSONResponse
-import base64
-from openai import OpenAI
 from pydantic import BaseModel, ValidationError
 from typing import Optional
 from dotenv import load_dotenv
@@ -10,7 +31,7 @@ from decide import predict_decision,replace_rule_table
 from price_predictor import insurance_model
 from contextlib import asynccontextmanager
 from schemas import FormData
-from helpers import get_insurance_data
+from helpers import extract_form_fields_from_image, get_insurance_data
 from reasoning_agent import explain_insurance_decision
 from schemas import RuleUpdate
 
@@ -32,52 +53,6 @@ app.add_middleware(
     allow_methods=["*"],              
     allow_headers=["*"],
 )
-
-# Initialize OpenAI client
-client = OpenAI()
-
-def extract_form_fields_from_image(image_bytes: bytes) -> FormData:
-    """
-    Extract form fields from an image using OpenAI's structured outputs
-    
-    Args:
-        image_bytes: Image file bytes
-        
-    Returns:
-        FormData object with extracted fields
-    """
-    # Encode the image
-    base64_image = base64.b64encode(image_bytes).decode('utf-8')
-    
-    # Make API call with structured output
-    response = client.responses.parse(
-        model="gpt-4o",  # Vision-capable model
-        input=[
-            {
-                "role": "system",
-                "content": "You are a medical form extraction assistant. Extract health-related information from the form. For height and weight, convert to centimeters and kilograms if given in other units. If smoking status is 'No' or unchecked, set cigarettes_per_day to None."
-            },
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "input_text",
-                        "text": "Please extract all the form fields from this image."
-                    },
-                    {
-                        "type": "input_image",
-                        "image_url": f"data:image/jpeg;base64,{base64_image}"
-                    }
-                ]
-            }
-        ],
-        text_format=FormData
-    )
-    
-    # Return parsed structured data
-    return response.output_parsed
-
-
 @app.post("/process")
 async def process_form(
     file: Optional[UploadFile] = File(None, description="Image file (required if type='image')"),

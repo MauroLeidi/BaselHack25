@@ -1,3 +1,17 @@
+"""
+reasoning_agent.py - Decision Explanation Module
+
+This module provides a class, `InsuranceDecisionExplainer`, designed to interpret 
+machine learning predictions for insurance decision-making. It combines a 
+pre-trained **Random Forest Classifier** with **SHAP (SHapley Additive exPlanations)** values for feature importance, and an integration with **OpenAI's GPT** models 
+to generate natural language explanations for the predicted decision.
+
+Key Features:
+- Loads a trained model and encoder (joblib files).
+- Calculates prediction, probability, and SHAP contributions.
+- Uses SHAP values to prompt GPT-4 for human-readable underwriting explanations.
+"""
+
 import joblib
 import pandas as pd
 import numpy as np
@@ -12,8 +26,8 @@ class InsuranceDecisionExplainer:
     Explains insurance decisions using Random Forest predictions and SHAP values.
     """
     
-    def __init__(self, model_path="../assets/predictor_decision.joblib", 
-                 encoder_path="../assets/label_encoder.joblib",
+    def __init__(self, model_path="../../assets/predictor_decision.joblib", 
+                 encoder_path="../../assets/label_encoder.joblib",
                  openai_api_key=None):
         """
         Initialize the explainer by loading the trained model and encoder.
@@ -164,8 +178,8 @@ Your explanation:"""
 
 
 def explain_insurance_decision(insurance_data, 
-                               model_path="../assets/predictor_decision.joblib",
-                               encoder_path="../assets/label_encoder.joblib",
+                               model_path="../../assets/predictor_decision.joblib",
+                               encoder_path="../../assets/label_encoder.joblib",
                                use_gpt=True,
                                gpt_model="gpt-4",
                                verbose=True):

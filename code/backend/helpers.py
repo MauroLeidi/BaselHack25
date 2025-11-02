@@ -2,6 +2,15 @@ import numpy as np
 import pandas as pd
 import numpy as np
 from schemas import FormData
+from dotenv import load_dotenv
+import base64
+from openai import OpenAI
+
+load_dotenv()
+
+# Initialize OpenAI client
+client = OpenAI()
+
 
 def sample_population(n_samples=10_000, seed=42):
     """
@@ -142,6 +151,10 @@ def sample_population(n_samples=10_000, seed=42):
     return df
 
 def get_insurance_data(form_data: FormData):
+    """
+    Transforms raw user data from a FormData object into a structured dictionary
+    of features required for insurance risk assessment or pricing models.
+    """
     height_m = form_data.height_cm / 100
     BMI = round(form_data.weight_kg / (height_m ** 2), 1)
     birth_year = int(form_data.date_of_birth.split(".")[-1])
@@ -154,3 +167,44 @@ def get_insurance_data(form_data: FormData):
         'PRACTICE_SPORT': len(form_data.sports) > 0,
         'PRICE_INSURANCE': form_data.insurance_price
     }
+
+def extract_form_fields_from_image(image_bytes: bytes) -> FormData:
+    """
+    Extract form fields from an image using OpenAI's structured outputs
+    
+    Args:
+        image_bytes: Image file bytes
+        
+    Returns:
+        FormData object with extracted fields
+    """
+    # Encode the image
+    base64_image = base64.b64encode(image_bytes).decode('utf-8')
+    
+    # Make API call with structured output
+    response = client.responses.parse(
+        model="gpt-4o",  # Vision-capable model
+        input=[
+            {
+                "role": "system",
+                "content": "You are a medical form extraction assistant. Extract health-related information from the form. For height and weight, convert to centimeters and kilograms if given in other units. If smoking status is 'No' or unchecked, set cigarettes_per_day to None."
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "input_text",
+                        "text": "Please extract all the form fields from this image."
+                    },
+                    {
+                        "type": "input_image",
+                        "image_url": f"data:image/jpeg;base64,{base64_image}"
+                    }
+                ]
+            }
+        ],
+        text_format=FormData
+    )
+    
+    # Return parsed structured data
+    return response.output_parsed
