@@ -1,151 +1,121 @@
 # BaselHack25 INSPECT AND UNDERWRITE
 
-This repository contains the backend API for BaselHack25, including health decision rules, form processing, and AI-assisted data extraction.
+# Insurance Underwriting & Premium Prediction System
 
-## Table of Contents
+A comprehensive AI-powered insurance underwriting platform that combines machine learning, rule-based decision engines, and explainable AI to automate insurance application processing and premium calculation.
 
-* [Requirements](#requirements)
-* [Setup with Conda](#setup-with-conda)
-* [Running the API](#running-the-api)
-* [Endpoints](#endpoints)
+## 🎯 Overview
 
----
+This system provides end-to-end automation for insurance underwriting, featuring:
 
-## Requirements
+- **Intelligent Form Extraction**: Automated data extraction from scanned application forms using GPT-4 Vision
+- **Hybrid Decision Engine**: Combines hard-coded operational rules with adaptive learned rules
+- **ML-Powered Premium Prediction**: Random Forest model for accurate premium calculations
+- **Explainable AI**: SHAP values + GPT-4 for human-readable decision explanations
+- **Monte Carlo Simulation**: Understanding risk and trends from the data
+- **Multilingual Support**: Full internationalization (English, German, French, Italian)
 
-* [Anaconda](https://www.anaconda.com/) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
-* Python 3.12 (managed via Conda)
+## 🏗️ Project Structure
 
----
+### Backend (FastAPI)
 
-## Setup with Conda
+```
+code/backend/
+├── app.py                 # Main API endpoints & orchestration
+├── decide.py              # Hybrid rules engine (Operational + Learned)
+├── price_predictor.py     # ML model for premium prediction
+├── reasoning_agent.py     # SHAP + GPT explanation generator
+├── helpers.py             # Synthetic data generation & form extraction
+└── schemas.py             # Pydantic data models
+```
 
-1. **Clone the repository** (if not already done):
+**File Descriptions:**
 
+- **`app.py`**: Core FastAPI application defining three main endpoints: `/process` for image-based form extraction, `/predict` for underwriting decisions and pricing, and `/admin/update_rules` for rule management. Orchestrates all backend components.
+
+- **`decide.py`**: Implements a two-tier decision system combining hard-coded operational rules (immediate rejections, risk tiers) with a similarity-based learned rules table stored in CSV. Supports continuous learning via the `LEARN_FLAG`.
+
+- **`price_predictor.py`**: Manages the Random Forest regression model for premium prediction. Calculates predicted prices and adjustment percentages/amounts relative to base premiums.
+
+- **`reasoning_agent.py`**: Provides explainable AI using SHAP values to quantify feature contributions, then generates natural language explanations via GPT-4 for underwriting decisions.
+
+- **`helpers.py`**: Contains utilities for generating synthetic Swiss population data based on demographic statistics, extracting structured form data from images using OpenAI Vision API, and transforming raw inputs into model-ready features.
+
+- **`schemas.py`**: Defines Pydantic models for API request/response validation including `FormData`, `PredictionOutput`, and `RuleUpdate`.
+
+### Frontend (Next.js)
+
+```
+code/frontend/
+```
+
+### ML Models & Notebooks
+
+```
+code/notebooks/
+├── premium_predictor.ipynb    # Random Forest premium prediction model
+└── rules_handling.ipynb       # Rule engine development & testing
+```
+
+**Notebook Descriptions:**
+
+- **`premium_predictor.ipynb`**: Develops a Random Forest regression model for insurance premium prediction using synthetic Swiss population data. Features include age, BMI, smoking status, and sports activity, with pricing logic that applies surcharges for smokers and discounts for active individuals.
+
+- **`rules_handling.ipynb`**: Demonstrates the rule-based override system that applies business logic on top of ML predictions. Shows how operational rules can adjust predicted premiums based on specific conditions (e.g., non-smoker rewards, threshold-based pricing).
+
+## 🚀 Key Features
+
+### Vision-Based Form Processing
+Upload scanned insurance applications and automatically extract structured data including personal information, physical metrics, and lifestyle factors with automatic unit conversion.
+
+### Adaptive Decision Engine
+Two-tier architecture combining hard-coded operational rules for immediate decisions with a similarity-based learned rules table that continuously improves from operational overrides.
+
+### ML Premium Prediction
+Random Forest model predicts insurance premiums based on age, BMI, smoking status, and physical activity, returning predicted prices with adjustment calculations.
+
+### Explainable AI
+Three-layer explanation system: rule-based comments, SHAP feature importance scores, and GPT-4 generated natural language summaries.
+
+## 📊 API Endpoints
+
+### `POST /process`
+Extract structured form data from uploaded image files.
+
+### `POST /predict`
+Get underwriting decision, premium calculation, and detailed reasoning for an application.
+
+### `POST /admin/update_rules`
+Bulk update the learned rules table with new decision patterns.
+
+### `GET /health`
+Health check endpoint for monitoring.
+
+## 🛠️ Setup & Installation
+
+### Backend Setup
 ```bash
-git clone https://github.com/MauroLeidi/BaselHack25.git
-cd BaselHack25/code
+cd code/backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+echo "OPENAI_API_KEY=your_key_here" > .env
+uvicorn app:app --reload --port 8000
 ```
 
-2. **Create the Conda environment from the YAML file**:
-
+### Frontend Setup
 ```bash
-conda env create -f environment.yml
+cd code/frontend
+npm install
+npm run dev
 ```
 
-This will create a self-contained environment with all dependencies installed.
+### Required Assets
+Place in `assets/` directory:
+- `insurance_model.joblib` - Premium prediction model
+- `base_price.joblib` - Mean training price
+- `predictor_decision.joblib` - Decision classifier
+- `label_encoder.joblib` - Outcome encoder
+- `learned_rules.csv` - Adaptive rule table
 
-3. **Activate the environment**:
-
-```bash
-conda activate baselhack25
-```
-
-4. **Verify installation** (optional):
-
-```bash
-python -c "import pandas, numpy, fastapi, uvicorn; print('All imports successful')"
-```
-
----
-
-## Running the API
-
-Once the environment is activated:
-
-```bash
-uvicorn api:app --reload
-```
-
-This will start the FastAPI server at:
-
-```
-http://127.0.0.1:8000
-```
-
-* `--reload` enables hot-reload for development.
-
----
-
-## Endpoints
-
-### 1. `/predict` – Predict decision from online form
-
-**Method:** `POST`
-**Body (JSON):**
-
-```json
-{
-  "smokes": true,
-  "cigarettes_per_day": 10,
-  "height_cm": 175,
-  "weight_kg": 70,
-  "date_of_birth": "15.03.1988"
-}
-```
-
-**Response:**
-
-```json
-{
-  "status": "success",
-  "decision": "accepted",
-  "reason": "Nothing special: healthy lifestyle"
-}
-```
-
----
-
-### 2. `/process` – Process image or online form
-
-* **Method:** `POST`
-* **Form Data:**
-
-  * `type`: `"image"` or `"online"`
-  * `file`: image file (required if type="image")
-  * `data`: JSON string (required if type="online")
-
----
-
-### 3. `/admin/update_rules` – Update rules table
-
-**Method:** `POST`
-**Body (JSON):**
-
-```json
-{
-  "rules": [
-    {
-      "BMI": 22,
-      "AGE": 25,
-      "SMOKER": false,
-      "PRACTICE_SPORT": true,
-      "DECISION": "accepted",
-      "COMMENT": "Nothing special"
-    },
-    {
-      "BMI": 30,
-      "AGE": 45,
-      "SMOKER": true,
-      "PRACTICE_SPORT": false,
-      "DECISION": "accepted with extra charge",
-      "COMMENT": "Higher risk: middle-aged smoker, inactive"
-    }
-  ]
-}
-```
-
-* Replaces the entire rule table in memory.
-
----
-
-### 4. `/health` – Health check
-
-**Method:** `GET`
-**Response:**
-
-```json
-{
-  "status": "healthy"
-}
-```
+**Built with**: FastAPI • Next.js • Scikit-learn • SHAP • OpenAI GPT-4 • Pydantic
