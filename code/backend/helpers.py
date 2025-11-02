@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import numpy as np
+from schemas import FormData
 
 def sample_population(n_samples=10_000, seed=42):
     """
@@ -138,3 +140,17 @@ def sample_population(n_samples=10_000, seed=42):
     })
 
     return df
+
+def get_insurance_data(form_data: FormData):
+    height_m = form_data.height_cm / 100
+    BMI = round(form_data.weight_kg / (height_m ** 2), 1)
+    birth_year = int(form_data.date_of_birth.split(".")[-1])
+    current_year = 2025
+    AGE = current_year - birth_year
+    return {
+        'BMI': BMI,
+        'AGE': AGE,
+        'SMOKER': form_data.smokes,
+        'PRACTICE_SPORT': len(form_data.sports) > 0,
+        'PRICE_INSURANCE': form_data.insurance_price
+    }

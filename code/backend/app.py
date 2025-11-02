@@ -2,17 +2,17 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import JSONResponse
 import base64
 from openai import OpenAI
-from pydantic import BaseModel, Field, field_validator, ValidationError
-from typing import List, Optional
-import json
+from pydantic import BaseModel, ValidationError
+from typing import Optional
 from dotenv import load_dotenv
-from datetime import datetime
-from fastapi.middleware.cors import CORSMiddleware # 1. Import Middleware
+from fastapi.middleware.cors import CORSMiddleware
 from decide import predict_decision,replace_rule_table
-from utils import insurance_model
+from price_predictor import insurance_model
 from contextlib import asynccontextmanager
-from utils import FormData, get_insurance_data
+from schemas import FormData
+from helpers import get_insurance_data
 from reasoning_agent import explain_insurance_decision
+from schemas import RuleUpdate
 
 load_dotenv()
 
@@ -27,31 +27,14 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],      # Permette tutte le origini
-    allow_credentials=True,             # Permette cookies, Authorization headers, ecc.
-    allow_methods=["*"],                # Permette tutti i metodi (GET, POST, PUT, DELETE, OPTIONS, etc.)
-    allow_headers=["*"],                # Permette tutti gli header (incluso Content-Type)
+    allow_origins=["*"],     
+    allow_credentials=True,            
+    allow_methods=["*"],              
+    allow_headers=["*"],
 )
-
-
-
 
 # Initialize OpenAI client
 client = OpenAI()
-
-# -------------------------------------------------------------------------------
-# Pydantic model for rules, useful when rules updates are made from the frontend
-# -------------------------------------------------------------------------------
-class RuleItem(BaseModel):
-    BMI: float
-    AGE: int
-    SMOKER: bool
-    PRACTICE_SPORT: bool
-    DECISION: str
-    COMMENT: str
-    
-class RuleUpdate(BaseModel):
-    rules: list[RuleItem]
 
 def extract_form_fields_from_image(image_bytes: bytes) -> FormData:
     """

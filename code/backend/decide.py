@@ -1,9 +1,6 @@
 import pandas as pd
 import numpy as np
 
-# --------------------------------------------------
-# 1. Setup and initial rules
-# --------------------------------------------------
 LEARN_FLAG = True  # Global learning flag
 
 columns = ['BMI', 'AGE', 'SMOKER', 'PRACTICE_SPORT', 'DECISION', 'COMMENT']
@@ -11,7 +8,7 @@ columns = ['BMI', 'AGE', 'SMOKER', 'PRACTICE_SPORT', 'DECISION', 'COMMENT']
 rules_df = pd.read_csv("../assets/learned_rules.csv")
 
 # --------------------------------------------------
-# 2. Operational Analytical Rule
+# 1. Operational Analytical Rule
 # --------------------------------------------------
 def operational_rule(BMI, AGE, SMOKER, PRACTICE_SPORT):
     # --- Hard rejections ---
@@ -72,7 +69,7 @@ def operational_rule(BMI, AGE, SMOKER, PRACTICE_SPORT):
 
 
 # --------------------------------------------------
-# 3. Similarity and rule selection
+# 2. Similarity and rule selection
 # --------------------------------------------------
 def compute_similarity(row, x_input):
     sim = 0
@@ -90,7 +87,7 @@ def find_best_rule(rules_df, x_input):
 
 
 # --------------------------------------------------
-# 4. Decision and learning logic
+# 3. Decision and learning logic
 # --------------------------------------------------
 def decide_and_learn(rules_df, x_input, learn_flag=True):
     operational_decision, operational_comment = operational_rule(
@@ -131,7 +128,7 @@ def decide_and_learn(rules_df, x_input, learn_flag=True):
 
 
 # --------------------------------------------------
-# 5. Helper for API use (no learning)
+# 4. Helper for API use (no learning)
 # --------------------------------------------------
 def predict_decision(x_input):
     """
@@ -141,7 +138,7 @@ def predict_decision(x_input):
     return decision, comment
 
 # --------------------------------------------------
-# 6. Admin bulk rule update
+# 5. Admin bulk rule update
 # --------------------------------------------------
 def replace_rule_table(new_rules):
     """
