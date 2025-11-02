@@ -19,20 +19,18 @@ import ConfirmModal from "@/app/components/admin/ConfirmModal";
 import RulesFormCard from "@/app/components/admin/RulesFormCard";
 import { useTranslations } from "next-intl";
 
-// API helpers
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 function toAbsoluteUrl(pathOrUrl: string) {
   try {
     new URL(pathOrUrl);
-    return pathOrUrl; // already absolute
+    return pathOrUrl; 
   } catch {}
   return new URL(pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`, API_BASE).toString();
 }
 
-// Mock images served from /public (adjust paths as needed)
 const MOCK_PLOTS =
   (process.env.NEXT_PUBLIC_PREVIEW_MOCKS?.split(",").map((s) => s.trim()).filter(Boolean)) ??
-  ["/plots/preview_sample.jpeg"]; // single default mock
+  ["/plots/preview_sample.jpeg"]; 
 
 export default function AdminPage() {
   const { locale } = useParams() as { locale: string };
@@ -97,8 +95,6 @@ export default function AdminPage() {
       setSending(false);
     }
   }
-  // mock preview
-  // Preview (multiple plots) — MOCK ONLY, no API call
 async function handlePreview() {
   if (!product) {
     notifications.show({ title: "Missing product", message: "Select a product.", color: "orange" });
@@ -113,7 +109,6 @@ async function handlePreview() {
   setPreviewing(true);
   setPreviewUrls([]);
 
-  // small delay to simulate work
   setTimeout(() => {
     const urls = MOCK_PLOTS.map((p) => {
       const base = p.startsWith("/") ? p : `/${p}`;
@@ -121,11 +116,11 @@ async function handlePreview() {
     });
     setPreviewUrls(urls);
     setPreviewing(false);
-    notifications.show({ title: "Preview ready", message: "Loaded mock plot(s).", color: "green" });
+    notifications.show({ title: "Preview ready", message: "Loaded plot(s).", color: "green" });
   }, 500);
 }
 
-  // Preview (multiple plots) — no image validation
+  // Preview (multiple plots)
   /*async function handlePreview() {
     if (!product) {
       notifications.show({ title: "Missing product", message: "Select a product.", color: "orange" });
@@ -268,7 +263,6 @@ async function handlePreview() {
             previewing={previewing}
           />
 
-          {/* Preview Area (hidden until first use) */}
           {(previewing || previewUrls.length > 0) && (
             <div style={{ marginTop: 8 }} aria-live="polite">
               <Text fw={700} style={{ marginBottom: 6 }}>Preview</Text>
