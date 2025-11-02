@@ -14,6 +14,7 @@
     "date_of_birth": "Date de naissance",
     "cigarettes_per_day": "Cigarettes par jour",
     "sport_section": "Sports",
+    "price_section": "Prix",
     "sport_name": "Sport",
     "sport_placeholder": "p. ex., Basket-ball, Course à pied, Escalade…",
     "sport_level": "Niveau",
@@ -22,12 +23,15 @@
     "add_sport": "Ajouter un sport",
     "remove": "Supprimer",
     "submit": "Envoyer",
+    "reading": "Envoi en cours...",
+    "insurance_price": "Prime d’assurance (CHF)",
     "errors": {
       "title": "Erreur de validation",
       "required": "Veuillez compléter tous les champs obligatoires.",
       "fix_fields": "Veuillez corriger les champs indiqués.",
       "first_name_required": "Le prénom est requis.",
       "last_name_required": "Le nom est requis.",
+      "total_price_invalid": "Veuillez saisir une prime d'assurance valide",
       "name_invalid": "Le nom contient des caractères non valides.",
       "smoke_required": "Veuillez indiquer si vous fumez.",
       "cpd_required": "Veuillez préciser combien de cigarettes vous fumez par jour.",
@@ -80,5 +84,22 @@
     "fill_form": "Remplir le formulaire en ligne",
     "upload": "Télécharger une photo ou un PDF",
     "reading": "Lecture du document…"
+  },
+    "products": {
+    "pillar-3a": "Pilier 3a",
+    "child-insurance": "Assurance enfant",
+    "accident-insurance": "Assurance accident"
+  },
+   "admin": {
+    "file_placeholder": "Sélectionner un fichier",
+    "console_title": "Console d'administration",
+    "console_subtitle": "Télécharger les règles et afficher l’aperçu",
+
+    "product_label": "Produit",
+    "product_placeholder": "Sélectionner un produit",
+    "upload_rules": "Télécharger le fichier de règles (JSON)",
+    "selected": "Sélectionné",
+    "preview": "Aperçu",
+    "update": "Mettre à jour"
   }
 }

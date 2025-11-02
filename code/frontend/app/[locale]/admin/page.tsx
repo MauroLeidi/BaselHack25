@@ -17,6 +17,7 @@ import {
 import { IconChevronLeft } from "@tabler/icons-react";
 import ConfirmModal from "@/app/components/admin/ConfirmModal";
 import RulesFormCard from "@/app/components/admin/RulesFormCard";
+import { useTranslations } from "next-intl";
 
 // API helpers
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
@@ -35,6 +36,7 @@ const MOCK_PLOTS =
 
 export default function AdminPage() {
   const { locale } = useParams() as { locale: string };
+  const t = useTranslations("admin");
   const [product, setProduct] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
@@ -238,10 +240,10 @@ async function handlePreview() {
         <Stack gap="lg">
           <div>
             <Title order={2} style={{ letterSpacing: "-0.01em" }}>
-              Admin Console
-            </Title>
-            <Text c="dimmed" mt={4}>
-              Upload rules & preview
+              {t("console_title")}
+             </Title>
+             <Text c="dimmed" mt={4}>
+               {t("console_subtitle")}
             </Text>
           </div>
 

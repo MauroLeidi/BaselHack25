@@ -8,33 +8,67 @@ LEARN_FLAG = True  # Global learning flag
 
 columns = ['BMI', 'AGE', 'SMOKER', 'PRACTICE_SPORT', 'DECISION', 'COMMENT']
 
-rules_data = [
-    [22.0, 25, False, True,  "accepted", "Nothing special"],
-    [30.0, 45, True,  False, "accepted with extra charge", "Higher risk: middle-aged smoker, inactive"],
-    [27.0, 35, False, False, "need for additional information", "Missing health activity data"],
-    [35.0, 55, True,  False, "rejected", "Too high risk: older smoker with high BMI"],
-    [19.0, 20, False, True,  "accepted", "Young and active, low risk"],
-    [25.0, 40, True,  True,  "accepted with extra charge", "Smoker but compensates with sport activity"]
-]
-
-rules_df = pd.DataFrame(rules_data, columns=columns)
+rules_df = pd.read_csv("../assets/learned_rules.csv")
 
 # --------------------------------------------------
 # 2. Operational Analytical Rule
 # --------------------------------------------------
 def operational_rule(BMI, AGE, SMOKER, PRACTICE_SPORT):
-    if SMOKER and BMI > 30:
-        return "rejected", "Rejected because of too high risk (smoker with high BMI)"
-    elif SMOKER and not PRACTICE_SPORT:
-        return "accepted with extra charge", "Smoker without physical activity → higher premium"
-    elif BMI < 20 and AGE < 25:
-        return "accepted", "Nothing special: low BMI and young"
-    elif BMI > 27 and AGE > 50:
-        return "rejected", "Rejected due to advanced age and high BMI"
-    elif PRACTICE_SPORT and not SMOKER:
-        return "accepted", "Nothing special: healthy lifestyle"
-    else:
-        return "need for additional information", "Unclear risk profile → additional info needed"
+    # --- Hard rejections ---
+    if AGE > 85:
+        return "rejected", "very high age (86+ years)"
+    if BMI > 45:
+        return "rejected", "morbid obesity (BMI > 45)"
+    if BMI < 14 and AGE < 18:
+        return "rejected", "severely underweight minor (BMI < 14)"
+    if BMI < 16 and AGE >= 18:
+        return "rejected", "severe underweight adult (BMI < 16)"
+    if SMOKER and BMI > 35:
+        return "rejected", "obese smoker (BMI > 35)"
+    if SMOKER and AGE > 67 and not PRACTICE_SPORT:
+        return "rejected", "aged smoker without sport"
+
+    # --- Adolescents ---
+    if AGE < 18:
+        if BMI < 16 or BMI > 30:
+            return "need for additional information", "BMI outside healthy adolescent range"
+        else:
+            return "accepted", "healthy adolescent profile"
+
+    # --- Very healthy older adults (lenient rule for 60–85) ---
+    if AGE <= 85 and AGE > 60 and not SMOKER and PRACTICE_SPORT and 18.5 <= BMI <= 30:
+        return "accepted with extra charge", "healthy older adult (60–85), active and good BMI"
+
+    if AGE > 75 and not PRACTICE_SPORT:
+        return "rejected", "older adult (>=76), not active"
+    # --- Extra charge rules ---
+    if SMOKER and BMI > 25:
+        return "accepted with extra charge", "smoker with overweight BMI"
+    if SMOKER and AGE > 60:
+        return "accepted with extra charge", "older smoker"
+    if 35 <= BMI <= 45:
+        return "accepted with extra charge", "obese (BMI 35–45)"
+    if BMI < 18.5:
+        return "accepted with extra charge", "underweight adult"
+    if AGE >= 70 and not SMOKER:
+        return "accepted with extra charge", "advanced age (70+)"
+    if PRACTICE_SPORT == False and BMI > 30:
+        return "accepted with extra charge", "inactive overweight"
+
+    # --- Need more info for specific age/BMI combos ---
+    if 65 <= AGE < 70:
+        return "need for additional information", "age between 65–70, require medical exam"
+    if 18 <= AGE <= 25 and (BMI < 18.5 or BMI > 30):
+        return "need for additional information", "unusual BMI for young adult"
+
+    # --- Default acceptance ---
+    if (18.5 <= BMI <= 30) and (AGE <= 60) and not SMOKER and PRACTICE_SPORT:
+        return "accepted", "healthy BMI, non-smoker, active, age ≤ 60"
+    if (18.5 <= BMI <= 30) and (AGE <= 60) and not SMOKER:
+        return "accepted", "healthy BMI, non-smoker, age ≤ 60"
+
+    # --- Catch-all ---
+    return "accepted with extra charge", "moderate risk profile, no major issues"
 
 
 # --------------------------------------------------
@@ -59,7 +93,7 @@ def find_best_rule(rules_df, x_input):
 # 4. Decision and learning logic
 # --------------------------------------------------
 def decide_and_learn(rules_df, x_input, learn_flag=True):
-    operational_decision, comment = operational_rule(
+    operational_decision, operational_comment = operational_rule(
         x_input['BMI'], x_input['AGE'], x_input['SMOKER'], x_input['PRACTICE_SPORT']
     )
 
@@ -74,11 +108,14 @@ def decide_and_learn(rules_df, x_input, learn_flag=True):
 
     if perfect_match:
         decision = best_rule['DECISION']
+        comment = best_rule["COMMENT"]
         if decision != operational_decision and learn_flag:
-            rules_df.loc[best_rule.name, ['DECISION', 'COMMENT']] = [operational_decision, comment]
+            rules_df.loc[best_rule.name, ['DECISION', 'COMMENT']] = [operational_decision, operational_comment]
             decision = operational_decision
+            comment = operational_comment
     else:
         decision = best_rule['DECISION']
+        comment = best_rule["COMMENT"]
         if learn_flag:
             new_rule = {
                 'BMI': x_input['BMI'],
@@ -86,11 +123,11 @@ def decide_and_learn(rules_df, x_input, learn_flag=True):
                 'SMOKER': x_input['SMOKER'],
                 'PRACTICE_SPORT': x_input['PRACTICE_SPORT'],
                 'DECISION': operational_decision,
-                'COMMENT': comment
+                'COMMENT': operational_comment
             }
             rules_df.loc[len(rules_df)] = new_rule
 
-    return decision, operational_decision, comment, rules_df
+    return decision, operational_decision, comment, operational_comment, rules_df
 
 
 # --------------------------------------------------
@@ -100,7 +137,7 @@ def predict_decision(x_input):
     """
     Predict decision from form data without modifying the rules table.
     """
-    decision, _, comment, _ = decide_and_learn(rules_df, x_input, learn_flag=False)
+    decision,_,comment,_, _ = decide_and_learn(rules_df, x_input, learn_flag=False)
     return decision, comment
 
 # --------------------------------------------------

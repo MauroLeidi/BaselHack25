@@ -14,6 +14,7 @@
     "cigarettes_per_day": "Cigarettes per day",
     "date_of_birth": "Date of birth",
     "sport_section": "Sports",
+    "price_section": "Price",
     "sport_name": "Sport",
     "sport_placeholder": "e.g., Basketball, Running, Climbing…",
     "sport_level": "Level",
@@ -22,8 +23,11 @@
     "add_sport": "Add sport",
     "remove": "Remove",
     "submit": "Submit",
+    "reading": "Sending...",
+    "insurance_price": "Insurance price (CHF)",
     "errors": {
       "title": "Validation error",
+      "insurance_price_invalid": "Please enter a valid insurance price",
       "required": "Please complete all required fields.",
       "fix_fields": "Please fix the highlighted fields.",
       "first_name_required": "First name is required.",
@@ -80,6 +84,23 @@
     "fill_form": "Fill in the online form",
     "upload": "Upload photo or PDF",
     "reading": "Reading document…"
-}
+},
+ "products": {
+    "pillar-3a": "Pillar 3a",
+    "child-insurance": "Child insurance",
+    "accident-insurance": "Accident insurance"
+  },
+   "admin": {
+    "product_label": "Product",
+    "product_placeholder": "Choose a product",
+    "upload_rules": "Upload rule file (JSON)",
+    "file_placeholder": "Select file",
+    "selected": "Selected",
+    "preview": "Preview",
+    "update": "Update",
+    "console_title": "Admin Console",
+    "console_subtitle": "Upload rules & preview"
+  }
+  
 
 }

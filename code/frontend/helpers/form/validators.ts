@@ -38,13 +38,16 @@ export const makeValidators = (t: (k: string) => string) => ({
     return null;
   },
   dob: (v: Date | null) => {
-    if (!v) return t("errors.dob_required");
-    const now = new Date();
-    const minDob = yearsAgo(100);
-    const maxDob = yearsAgo(1);
-    if (v > now) return t("errors.dob_future");
-    if (v < minDob) return t("errors.age_max");
-    if (v > maxDob) return t("errors.age_min_exact");
-    return null;
-  },
+  if (!v) return t("errors.dob_required");
+
+  const now = new Date();
+  const minDob = yearsAgo(100);
+  const maxDob = yearsAgo(1);
+
+  if (v > now) return t("errors.dob_future");
+  if (v < minDob) return t("errors.age_max");
+  if (v > maxDob) return t("errors.age_min_exact");
+
+  return null;
+},
 });

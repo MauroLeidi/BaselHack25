@@ -6,7 +6,7 @@ import NameFields from "@/app/components/form/NameFields";
 import SmokingFields from "@/app/components/form/SmokingFields";
 import SportsSection from "@/app/components/form/SportsSection";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
-import { formatDDMMYYYY } from "@/helpers/form/date";
+import { formatDDMMYYYY, parseLooseDob } from "@/helpers/form/date";
 import { prefillAll, PrefillPayload } from "@/helpers/form/prefill";
 import { Errors, Smoke, SportEntry } from "@/helpers/form/types";
 import { makeValidators } from "@/helpers/form/validators";
@@ -19,6 +19,8 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { NumberInput } from "@mantine/core";
+
 
 export default function OnlineFormPage() {
   const { locale } = useParams() as { locale: string };
@@ -35,6 +37,8 @@ export default function OnlineFormPage() {
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
   const shownNotiIdsRef = useRef<Set<string>>(new Set());
+  const [insurancePrice, setInsurancePrice] = useState<number | "">("");
+
 
   const isSmoker = smoke === "yes";
 
@@ -67,6 +71,12 @@ export default function OnlineFormPage() {
   const onBlurCPD = () => setFieldError("cigarettesPerDay", validators.cigarettesPerDay(cigarettesPerDay, isSmoker));
   const onBlurHeight = () => setFieldError("height", validators.height(height));
   const onBlurWeight = () => setFieldError("weight", validators.weight(weight));
+  const onBlurInsurancePrice = () =>
+  setFieldError(
+    "insurancePrice",
+    insurancePrice === "" || Number(insurancePrice) < 1 ? t("errors.insurance_price_invalid") : null
+  );
+
 
   useEffect(() => {
     if (!isSmoker) {
@@ -90,6 +100,7 @@ export default function OnlineFormPage() {
         setSmoke, setCigarettesPerDay,
         setHeight, setWeight,
         setDob, setSports,
+        setInsurancePrice
       });
     } catch { }
     finally {
@@ -106,6 +117,8 @@ export default function OnlineFormPage() {
     }
   }, []);
 
+  const isInsuranceValid =
+  typeof insurancePrice === "number" && insurancePrice >= 1;
   const isFormComplete =
     firstName.trim() &&
     lastName.trim() &&
@@ -113,7 +126,9 @@ export default function OnlineFormPage() {
     height !== "" &&
     weight !== "" &&
     dob !== null &&
-    (!isSmoker || cigarettesPerDay !== "");
+    (!isSmoker || cigarettesPerDay !== "") &&
+    isInsuranceValid
+
 
   function validateAll(): boolean {
     const e: Errors = {};
@@ -124,6 +139,11 @@ export default function OnlineFormPage() {
     const f5 = validators.height(height); if (f5) e.height = f5;
     const f6 = validators.weight(weight); if (f6) e.weight = f6;
     const f7 = validators.dob(dob); if (f7) e.dob = f7;
+    const f8 =
+      insurancePrice === "" || Number(insurancePrice) < 1
+        ? t("errors.insurance_price_invalid")
+        : null;
+    if (f8) e.insurancePrice = f8;
 
     setErrors(e);
     Object.entries(e).forEach(([k, msg]) =>
@@ -151,8 +171,11 @@ export default function OnlineFormPage() {
       cigarettes_per_day: isSmoker && cigarettesPerDay !== "" ? Number(cigarettesPerDay) : null,
       height_cm: Number(height),
       weight_kg: Number(weight),
-      date_of_birth: formatDDMMYYYY(dob),
+      date_of_birth: formatDDMMYYYY(
+      dob instanceof Date ? dob : parseLooseDob(String(dob))
+    ),
       sports: sports.map((r) => r.name.trim()).filter(Boolean),
+      insurance_price: Number(insurancePrice),
     };
 
     try {
@@ -275,6 +298,22 @@ export default function OnlineFormPage() {
                 labelRemove={t("remove")}
               />
 
+              <Divider label={t("price_section")} />
+
+              <NumberInput
+                label={t("insurance_price")}
+                required
+                value={insurancePrice}
+                onChange={(value) => setInsurancePrice(value === '' ? '' : Number(value))}
+                min={1}
+                step={1}
+                decimalScale={2}
+                onBlur={onBlurInsurancePrice}
+                error={errors.insurancePrice}
+                style={{ width: "50%" }}
+              />
+
+
               <Group justify="flex-end" mt="md">
                 <Button
                   size="md"
@@ -282,19 +321,9 @@ export default function OnlineFormPage() {
                   onClick={handleSubmit}
                   leftSection={<IconFileUpload size={18} />}
                   loading={submitting}
-                  disabled={
-                    !(
-                      firstName.trim() &&
-                      lastName.trim() &&
-                      smoke !== null &&
-                      height !== "" &&
-                      weight !== "" &&
-                      dob !== null &&
-                      (!isSmoker || cigarettesPerDay !== "")
-                    ) || Object.keys(errors).length > 0 || submitting
-                  }
+                  disabled={!isFormComplete || Object.keys(errors).length > 0 || submitting}
                 >
-                  {submitting ? t("reading") ?? "Sending…" : t("submit")}
+                  {submitting ? t("reading") : t("submit")}
                 </Button>
               </Group>
             </Stack>
