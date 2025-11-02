@@ -4,7 +4,7 @@
     "subtitle": "Rispondi in modo veritiero. I campi obbligatori devono essere compilati.",
     "firstName": "Nome",
     "lastName": "Cognome",
-    "smoke": "Fumi?",
+    "smoke": "Fuma?",
     "yes": "Sì",
     "no": "No",
     "age": "Età",
@@ -14,6 +14,7 @@
     "date_of_birth": "Data di nascita",
     "cigarettes_per_day": "Sigarette al giorno",
     "sport_section": "Sport",
+    "price_section": "Prezzo",
     "sport_name": "Disciplina sportiva",
     "sport_placeholder": "es. Basket, Corsa, Arrampicata…",
     "sport_level": "Livello",
@@ -22,15 +23,18 @@
     "add_sport": "Aggiungi sport",
     "remove": "Rimuovi",
     "submit": "Invia",
+    "reading": "Invio in corso...",
+    "insurance_price": "Premio assicurativo (CHF)",
     "errors": {
       "title": "Errore di validazione",
       "required": "Completa tutti i campi obbligatori.",
       "fix_fields": "Correggi i campi evidenziati.",
       "first_name_required": "Il nome è obbligatorio.",
       "last_name_required": "Il cognome è obbligatorio.",
+      "insurance_price_invalid": "Inserisci un premio assicurativo valido",
       "name_invalid": "Il nome contiene caratteri non validi.",
-      "smoke_required": "Indica se fumi.",
-      "cpd_required": "Indica quante sigarette fumi al giorno.",
+      "smoke_required": "Indichi se fuma.",
+      "cpd_required": "Indichi quante sigarette fuma al giorno.",
       "cpd_min": "Il valore non può essere negativo.",
       "cpd_max": "Inserisci un numero realistico (massimo 30).",
       "height_required": "Inserisci la tua altezza.",
@@ -71,5 +75,30 @@
       "close": "Chiudi",
       "retake": "Riscatta"
     }
+  },
+  "home": {
+    "title": "Domanda PAX",
+    "subtitle": "Scegli come desideri inviare le tue informazioni",
+    "select_product": "Seleziona prodotto",
+    "choose_product": "Scegli un prodotto",
+    "fill_form": "Compila il modulo online",
+    "upload": "Carica foto o PDF",
+    "reading": "Lettura del documento…"
+  },
+    "products": {
+    "pillar-3a": "Pilastro 3a",
+    "child-insurance": "Assicurazione bambino",
+    "accident-insurance": "Assicurazione infortuni"
+  },
+    "admin": {
+    "product_label": "Prodotto",
+    "product_placeholder": "Seleziona un prodotto",
+    "upload_rules": "Carica file regole (JSON)",
+    "selected": "Selezionato",
+    "preview": "Anteprima",
+    "update": "Aggiorna",
+    "file_placeholder": "Seleziona file",
+    "console_title": "Console di amministrazione",
+    "console_subtitle": "Carica regole e anteprima"
   }
 }

@@ -1,7 +1,7 @@
 {
   "form": {
     "title": "Gesundheitsfragebogen",
-    "subtitle": "Bitte beantworten Sie die Fragen wahrheitsgemäß. Pflichtfelder müssen ausgefüllt werden.",
+    "subtitle": "Bitte beantworten Sie alle Fragen ehrlich. Pflichtfelder sind erforderlich.",
     "firstName": "Vorname",
     "lastName": "Nachname",
     "smoke": "Rauchen Sie?",
@@ -14,6 +14,7 @@
     "cigarettes_per_day": "Zigaretten pro Tag",
     "date_of_birth": "Geburtsdatum",
     "sport_section": "Sport",
+    "price_section": "Preis",
     "sport_name": "Sportart",
     "sport_placeholder": "z. B. Basketball, Laufen, Klettern …",
     "sport_level": "Niveau",
@@ -22,12 +23,15 @@
     "add_sport": "Sport hinzufügen",
     "remove": "Entfernen",
     "submit": "Senden",
+    "insurance_price": "Versicherungsprämie (CHF)",
+    "reading": "Wird gesendet…",
     "errors": {
       "title": "Validierungsfehler",
       "required": "Bitte füllen Sie alle Pflichtfelder aus.",
       "fix_fields": "Bitte korrigieren Sie die markierten Felder.",
       "first_name_required": "Der Vorname ist erforderlich.",
       "last_name_required": "Der Nachname ist erforderlich.",
+      "insurance_price_invalid": "Bitte eine gültige Versicherungsprämie eingeben",
       "name_invalid": "Der Name enthält ungültige Zeichen.",
       "smoke_required": "Bitte geben Sie an, ob Sie rauchen.",
       "cpd_required": "Bitte geben Sie an, wie viele Zigaretten Sie pro Tag rauchen.",
@@ -71,5 +75,31 @@
       "close": "Schließen",
       "retake": "Erneut aufnehmen"
     }
-  }
+  },
+  "home": {
+    "title": "PAX Antrag",
+    "subtitle": "Wählen Sie, wie Sie Ihre Informationen übermitteln möchten",
+    "select_product": "Produkt wählen",
+    "choose_product": "Produkt auswählen",
+    "fill_form": "Online-Formular ausfüllen",
+    "upload": "Foto oder PDF hochladen",
+    "reading": "Dokument wird gelesen…"
+  },
+  "products": {
+  "pillar-3a": "Säule 3a",
+  "child-insurance": "Kindversicherung",
+  "accident-insurance": "Unfallversicherung"
+  },
+  "admin": {
+  "product_label": "Produkt",
+  "product_placeholder": "Produkt auswählen",
+  "file_placeholder": "Datei auswählen",
+  "upload_rules": "Regeldatei hochladen (JSON)",
+  "selected": "Ausgewählt",
+  "preview": "Vorschau",
+  "update": "Aktualisieren",
+  "console_title": "Admin-Konsole",
+  "console_subtitle": "Regeln hochladen & Vorschau"
+}
+
 }

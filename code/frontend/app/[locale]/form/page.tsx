@@ -6,7 +6,7 @@ import NameFields from "@/app/components/form/NameFields";
 import SmokingFields from "@/app/components/form/SmokingFields";
 import SportsSection from "@/app/components/form/SportsSection";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
-import { formatDDMMYYYY } from "@/helpers/form/date";
+import { formatDDMMYYYY, parseLooseDob } from "@/helpers/form/date";
 import { prefillAll, PrefillPayload } from "@/helpers/form/prefill";
 import { Errors, Smoke, SportEntry } from "@/helpers/form/types";
 import { makeValidators } from "@/helpers/form/validators";
@@ -14,11 +14,13 @@ import {
   ActionIcon, Button, Container, Divider, Group, Paper, Stack, Text, Title, Tooltip,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconChevronLeft } from "@tabler/icons-react";
+import { IconChevronLeft, IconFileUpload } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { NumberInput } from "@mantine/core";
+
 
 export default function OnlineFormPage() {
   const { locale } = useParams() as { locale: string };
@@ -33,7 +35,10 @@ export default function OnlineFormPage() {
   const [dob, setDob] = useState<Date | null>(null);
   const [sports, setSports] = useState<SportEntry[]>([{ name: "", level: "hobby" }]);
   const [errors, setErrors] = useState<Errors>({});
+  const [submitting, setSubmitting] = useState(false);
   const shownNotiIdsRef = useRef<Set<string>>(new Set());
+  const [insurancePrice, setInsurancePrice] = useState<number | "">("");
+
 
   const isSmoker = smoke === "yes";
 
@@ -66,6 +71,12 @@ export default function OnlineFormPage() {
   const onBlurCPD = () => setFieldError("cigarettesPerDay", validators.cigarettesPerDay(cigarettesPerDay, isSmoker));
   const onBlurHeight = () => setFieldError("height", validators.height(height));
   const onBlurWeight = () => setFieldError("weight", validators.weight(weight));
+  const onBlurInsurancePrice = () =>
+  setFieldError(
+    "insurancePrice",
+    insurancePrice === "" || Number(insurancePrice) < 1 ? t("errors.insurance_price_invalid") : null
+  );
+
 
   useEffect(() => {
     if (!isSmoker) {
@@ -89,6 +100,7 @@ export default function OnlineFormPage() {
         setSmoke, setCigarettesPerDay,
         setHeight, setWeight,
         setDob, setSports,
+        setInsurancePrice
       });
     } catch { }
     finally {
@@ -105,6 +117,8 @@ export default function OnlineFormPage() {
     }
   }, []);
 
+  const isInsuranceValid =
+  typeof insurancePrice === "number" && insurancePrice >= 1;
   const isFormComplete =
     firstName.trim() &&
     lastName.trim() &&
@@ -112,7 +126,9 @@ export default function OnlineFormPage() {
     height !== "" &&
     weight !== "" &&
     dob !== null &&
-    (!isSmoker || cigarettesPerDay !== "");
+    (!isSmoker || cigarettesPerDay !== "") &&
+    isInsuranceValid
+
 
   function validateAll(): boolean {
     const e: Errors = {};
@@ -123,6 +139,11 @@ export default function OnlineFormPage() {
     const f5 = validators.height(height); if (f5) e.height = f5;
     const f6 = validators.weight(weight); if (f6) e.weight = f6;
     const f7 = validators.dob(dob); if (f7) e.dob = f7;
+    const f8 =
+      insurancePrice === "" || Number(insurancePrice) < 1
+        ? t("errors.insurance_price_invalid")
+        : null;
+    if (f8) e.insurancePrice = f8;
 
     setErrors(e);
     Object.entries(e).forEach(([k, msg]) =>
@@ -132,6 +153,7 @@ export default function OnlineFormPage() {
   }
 
   async function handleSubmit() {
+    if (submitting) return;
     if (!isFormComplete || !validateAll()) {
       notifications.show({
         title: t("errors.title") ?? "Validation error",
@@ -149,11 +171,15 @@ export default function OnlineFormPage() {
       cigarettes_per_day: isSmoker && cigarettesPerDay !== "" ? Number(cigarettesPerDay) : null,
       height_cm: Number(height),
       weight_kg: Number(weight),
-      date_of_birth: formatDDMMYYYY(dob),
+      date_of_birth: formatDDMMYYYY(
+      dob instanceof Date ? dob : parseLooseDob(String(dob))
+    ),
       sports: sports.map((r) => r.name.trim()).filter(Boolean),
+      insurance_price: Number(insurancePrice),
     };
 
     try {
+      setSubmitting(true);
       const res = await fetch("http://localhost:8000/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -173,6 +199,9 @@ export default function OnlineFormPage() {
       window.location.assign(`/${locale}/result`);
     } catch (e: any) {
       notifications.show({ title: "Network error", message: e?.message ?? "Failed to reach server", color: "red", autoClose: 6000 });
+    }
+    finally {
+      setSubmitting(false);
     }
   }
 
@@ -194,7 +223,15 @@ export default function OnlineFormPage() {
         </Tooltip>
       </div>
 
-      <Container size="sm">
+      <Container
+        size="false"
+        style={{
+          width: "100%",
+          maxWidth: 640, // enforce same width everywhere
+          display: "flex",
+          justifyContent: "center",
+        }}
+          >
         <Stack align="center" gap="lg">
           <Stack gap={4} align="center">
             <Title order={2}>{t("title")}</Title>
@@ -202,7 +239,18 @@ export default function OnlineFormPage() {
             <LanguageSwitcher />
           </Stack>
 
-          <Paper shadow="sm" radius="lg" p="lg" withBorder style={{ width: "100%", maxWidth: 640 }}>
+          <Paper
+            shadow="sm"
+            radius="lg"
+            p="lg"
+            withBorder
+            style={{
+              width: "100%",
+              maxWidth: 640,
+              minWidth: 640, // lock width to avoid language text pushing form
+            }}
+          >
+
             <Stack gap="md">
               <NameFields
                 firstName={firstName} lastName={lastName}
@@ -250,24 +298,32 @@ export default function OnlineFormPage() {
                 labelRemove={t("remove")}
               />
 
+              <Divider label={t("price_section")} />
+
+              <NumberInput
+                label={t("insurance_price")}
+                required
+                value={insurancePrice}
+                onChange={(value) => setInsurancePrice(value === '' ? '' : Number(value))}
+                min={1}
+                step={1}
+                decimalScale={2}
+                onBlur={onBlurInsurancePrice}
+                error={errors.insurancePrice}
+                style={{ width: "50%" }}
+              />
+
+
               <Group justify="flex-end" mt="md">
                 <Button
                   size="md"
                   radius="md"
                   onClick={handleSubmit}
-                  disabled={
-                    !(
-                      firstName.trim() &&
-                      lastName.trim() &&
-                      smoke !== null &&
-                      height !== "" &&
-                      weight !== "" &&
-                      dob !== null &&
-                      (!isSmoker || cigarettesPerDay !== "")
-                    ) || Object.keys(errors).length > 0
-                  }
+                  leftSection={<IconFileUpload size={18} />}
+                  loading={submitting}
+                  disabled={!isFormComplete || Object.keys(errors).length > 0 || submitting}
                 >
-                  {t("submit")}
+                  {submitting ? t("reading") : t("submit")}
                 </Button>
               </Group>
             </Stack>

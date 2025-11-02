@@ -23,6 +23,7 @@ export type PrefillPayload = Partial<{
   dob: string | null;
 
   sports: string[];
+  insurance_price: number | null;
 }>;
 
 export function prefillNames(
@@ -113,6 +114,18 @@ export function prefillDob(
   return 0;
 }
 
+export function prefillInsurancePrice(
+  data: PrefillPayload,
+  setInsurancePrice: (v: number) => void,
+): number {
+  let applied = 0;
+  if (data.insurance_price) {
+    setInsurancePrice(data.insurance_price);
+    applied++;
+  }
+  return applied;
+}
+
 export function prefillAll(params: {
   data: PrefillPayload;
   setFirstName: (v: string) => void;
@@ -123,6 +136,7 @@ export function prefillAll(params: {
   setWeight: (v: number | "") => void;
   setDob: (d: Date | null) => void;
   setSports: (v: SportEntry[]) => void;
+  setInsurancePrice: (v: number | "") => void;
 }): number {
   const {
     data,
@@ -130,6 +144,7 @@ export function prefillAll(params: {
     setSmoke, setCigarettesPerDay,
     setHeight, setWeight,
     setDob, setSports,
+    setInsurancePrice
   } = params;
 
   let applied = 0;
@@ -139,5 +154,6 @@ export function prefillAll(params: {
   applied += prefillMetrics(data, setHeight, setWeight);
   applied += prefillDob(data, setDob);
   applied += prefillSports(data, setSports);
+  applied += prefillInsurancePrice(data, setInsurancePrice)
   return applied;
 }
