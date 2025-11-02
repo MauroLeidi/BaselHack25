@@ -17,7 +17,8 @@ This system provides end-to-end automation for insurance underwriting, featuring
 
 ## 🖼️ Application Screenshot
 
-![BaselHack25 App Screenshot](assets/app_screenshot.png)
+![BaselHack25 App Screenshot Top](assets/app_screen_top.png)
+![BaselHack25 App Screenshot Bottom](assets/app_screen_bottom.png)
 
 ## 🏗️ Project Structure
 
