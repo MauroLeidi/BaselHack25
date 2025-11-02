@@ -15,6 +15,10 @@ This system provides end-to-end automation for insurance underwriting, featuring
 - **Monte Carlo Simulation**: Understanding risk and trends from the data
 - **Multilingual Support**: Full internationalization (English, German, French, Italian)
 
+## 🖼️ Application Screenshot
+
+![BaselHack25 App Screenshot](assets/app_screenshot.png)
+
 ## 🏗️ Project Structure
 
 ### Backend (FastAPI)
